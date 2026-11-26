@@ -2923,7 +2923,7 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
     MESES.forEach(function (d, k) {
       zonas.push(nodo('rect', { x: m.l + slot * k, y: m.t, width: slot, height: base - m.t }, capa));
     });
-    geo = { y: y, cx: cx, w, h };
+    geo = { y: y, cx: cx, w, h, referencia:et, margen:m };
     aplicar(actual === null ? -1 : actual, true);
     requestAnimationFrame(function () { requestAnimationFrame(function () { lienzo.classList.remove('sin-transicion'); }); });
   }
@@ -2964,6 +2964,11 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
 
     if (!etiqueta || !geo) return;
     if (i < 0) { etiqueta.textContent = ''; return; }
+    if(geo.w<520) {
+      const aLaDerecha=i<MESES.length/2;
+      geo.referencia.setAttribute('x',aLaDerecha?geo.w-geo.margen.r:geo.margen.l);
+      geo.referencia.setAttribute('text-anchor',aLaDerecha?'end':'start');
+    }
     var d = MESES[i];
     etiqueta.setAttribute('x', geo.cx(i));
     etiqueta.setAttribute('y', geo.y(d.v) - tok('--space-3'));
