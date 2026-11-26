@@ -3473,8 +3473,11 @@ function createQKnowDive(svg) {
     // visor in its projected plane. A vertical dive keeps the helmet aligned
     // with the spine instead of twisting it 180 degrees through the neck.
     pose.neckLean=-Math.sin(roll)*(vertical?.50:1);
-    pose.headBank=neckFollow*(vertical?(-27*Math.sin(roll)-8*(1-Math.cos(roll))):
-      -diagonal*(rollAngle-17*Math.sin(roll)));
+    const estabilizacion=vertical?(-27*Math.sin(roll)-8*(1-Math.cos(roll))):
+      -diagonal*(rollAngle-17*Math.sin(roll));
+    // On the way back the chassis leads the turn. The visor can glance
+    // ahead without counter-rotating the neck through a right angle.
+    pose.headBank=neckFollow*mix(estabilizacion,32*Math.tanh(estabilizacion/32),clamp(heading.regreso||0));
     const faceRoll=roll+pose.headBank*rad;
     const lateral=lookX*Math.cos(faceRoll)+lookY*Math.sin(faceRoll);
     const elevation=-lookX*Math.sin(faceRoll)+lookY*Math.cos(faceRoll);
@@ -3541,7 +3544,10 @@ function createQKnowDive(svg) {
         const fore=blendFlightRay(oldFore,newFore,p,-sign);
         out[elbow]=out[shoulder].map((v,i)=>v+upper[i]);
         out[wrist]=out[elbow].map((v,i)=>v+fore[i]);
-        out[k+'a']=palmRoll(a[k+'a'],b[k+'a'],p,sign);
+        // Blend wrist flexion in the rotating forearm's frame. Keeping
+        // the palm in world space would fold it back as the elbow turns.
+        const from=signed(a[k+'a']-angle(oldFore)),to=signed(b[k+'a']-angle(newFore));
+        out[k+'a']=angle(fore)+from+signed(to-from)*p;
         continue;
       }
       const start=angle(oldUpper), end=angle(newUpper);
@@ -5148,13 +5154,16 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       return (a+(recorrido-distancias[a])/(distancias[b]-distancias[a]||1))/subdivisiones;
     }
     const punto=p=>muestra(parametro(p));
-    function direccion(p){
-      const t=parametro(p), k=Math.min(1,Math.floor(t)),u=t-k,v=1-u,[a,b,c,d]=curvas[k];
-      const tangente=[0,1].map(i=>v*v*(b[i]-a[i])+2*v*u*(c[i]-b[i])+u*u*(d[i]-c[i]));
-      const norma=Math.hypot(...tangente)||1;
-      return {x:tangente[0]/norma,y:tangente[1]/norma};
+    function rumboVisible(p){
+      // On the last few pixels of travel the projected curve turns almost in
+      // place. Aim along the approach so the wrists can settle at the figure.
+      const centro=Math.max(.03,Math.min(.91,p));
+      const t0=centro-.02,t1=centro+.02;
+      const desde=punto(t0), hasta=punto(t1);
+      const dy=hasta[1]-desde[1]-(t1-t0)*(fin-inicio);
+      return Math.atan2(dy,hasta[0]-desde[0])*180/Math.PI;
     }
-    return {inicio,fin,origen,llegada,fraccionNoviembre,punto,direccion,desplazamientoGuia,
+    return {inicio,fin,origen,llegada,fraccionNoviembre,punto,rumboVisible,desplazamientoGuia,
       avance:sy=>unidad((sy-inicio)/(fin-inicio))};
   }
 
@@ -5310,7 +5319,7 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
     let ruta, medir=true, activo=false, imprimiendo=false, lugar='';
     let entradaMensualPorEnlace=location.hash==='#mes-a-mes';
     let visto=null, ultimo=0, marca=scrollY, ultimaPosicion=null, haciaArriba=false, rumbo=0;
-    let planoDeVuelo=null, ejeDeVuelo=0, miradaDeVuelo=0, alabeoDeVuelo=0, reposoAngular=0;
+    let relojDeVuelta=false, origenDelAtajo=null;
     function bezierVuelo(c,t) {
       const s=1-t;
       return [0,1].map(i=>s*s*s*c[0][i]+3*s*s*t*c[1][i]+3*s*t*t*c[2][i]+t*t*t*c[3][i]);
@@ -5366,33 +5375,12 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
         return (iz+(siguiente-tiempos[iz])/(tiempos[der]-tiempos[iz]))/n;
       };
     }
-    function moderarGiro(actual,meta,dt,gradosPorSegundo,angular=true) {
-      const diferencia=angular?((meta-actual+540)%360+360)%360-180:meta-actual;
-      if(Math.abs(diferencia)<(angular?.08:.0005))return angular?actual+diferencia:meta;
-      const paso=Math.min(Math.abs(diferencia)*(-Math.expm1(-dt/170)),gradosPorSegundo*dt/1000);
+    function moderarGiro(actual,meta,dt,vueltasDeSentidoPorSegundo) {
+      const diferencia=meta-actual;
+      if(Math.abs(diferencia)<.0005)return meta;
+      const paso=Math.min(Math.abs(diferencia)*(-Math.expm1(-dt/170)),vueltasDeSentidoPorSegundo*dt/1000);
       pedir();
       return actual+Math.sign(diferencia)*paso;
-    }
-    function orientarVuelo(tramo,p,rumboCuerpo,rumboMirada,dt) {
-      if(planoDeVuelo!==tramo){
-        planoDeVuelo=tramo;ejeDeVuelo=rumboCuerpo;miradaDeVuelo=rumboCuerpo;alabeoDeVuelo=0;reposoAngular=0;
-      }
-      ejeDeVuelo=moderarGiro(ejeDeVuelo,rumboCuerpo,dt,125);
-      miradaDeVuelo=moderarGiro(miradaDeVuelo,rumboMirada,dt,185);
-      // The LED gaze can anticipate a turn while the neck stays with the shoulders.
-      const adelanto=((miradaDeVuelo-ejeDeVuelo+540)%360+360)%360-180;
-      miradaDeVuelo=ejeDeVuelo+Math.max(-24,Math.min(24,adelanto));
-      const rad=Math.PI/180;
-      return {x:Math.cos(ejeDeVuelo*rad),y:Math.sin(ejeDeVuelo*rad),
-        lookX:Math.cos(miradaDeVuelo*rad),lookY:Math.sin(miradaDeVuelo*rad),
-        vertical:ruta.vertical,phase:p};
-    }
-    function inclinarVuelo(meta,dt,peso) {
-      alabeoDeVuelo=moderarGiro(alabeoDeVuelo,meta,dt,130);
-      // While fully extended, 0 and 360 are the same upright pose. Choose
-      // its nearest representation before easing back onto the keyboard.
-      if(peso===1 || peso===0)reposoAngular=Math.round(alabeoDeVuelo/360)*360;
-      return mezclar(reposoAngular,alabeoDeVuelo,peso);
     }
     // The curves are in document space. While the page is ahead of the rig,
     // sample the camera at the same progress as the pose. At either station,
@@ -5406,7 +5394,7 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       return antes+despues;
     }
     function sincronizarVuelos() {
-      visto=null;progresoMes=null;avanceCrecimiento=null;tramoFirma=null;planoDeVuelo=null;
+      visto=null;progresoMes=null;avanceCrecimiento=null;tramoFirma=null;
     }
     function tiempoPorDistancia(fraccion) {
       let lo=0,hi=1;
@@ -5570,16 +5558,17 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
         const gesto=impulsoDePortada(p);
         return 46*gesto.lateral+gesto.bajada*gesto.banco;
       });
+      ruta.compasRegreso=medirCompas(0,finPortada,
+        (p,sy)=>puntoEnCurva(faseRegresoPortada(p),sy),3.1,
+        p=>bancoDeRegreso(p,tangenteDeVuelo(faseRegresoPortada(p))));
       m.compas=medirCompas(m.inicio,m.fin,m.punto,3.4,p=>{
         const rumbo=vertical?90:m.rumbo(p);
         const extendido=suave(p,.006,.082), reposo=suave(p,.85,1);
         return mezclar((90+rumbo)*extendido,vertical?0:360,reposo);
       });
-      c.compas=medirCompas(c.inicio,c.fin,c.punto,2.9);
-      f.compasSalida=medirCompas(f.salidaFirma,f.finSalida,
-        vertical?f.partidaVertical:p=>bezierVuelo(f.partida,ritmoVuelo(p)),2.35);
-      f.compasLlegada=medirCompas(f.entradaFirma,f.llegadaFirma,
-        vertical?f.llegadaVertical:p=>bezierVuelo(f.llegada,ritmoVuelo(p)),2.8);
+      c.compas=medirCompasCrecimiento(c,vertical);
+      f.vueloDesdeCrecimiento=medirTramoFirma(f,true);
+      f.vueloAlCierre=medirTramoFirma(f,false);
       zonasDeLectura=tintaMovil.matches?textoEnElRecorrido.map(cajaDeRecorrido):[];
       medir=false;
     }
@@ -5629,6 +5618,14 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       }
       return Math.atan2(dy,dx)*180/Math.PI;
     }
+    function faseRegresoPortada(p) {
+      // Let go of the keys before departing along the existing pencil arc.
+      const salida=1-p;
+      return 1-salida*suave(salida,.042,.155);
+    }
+    function bancoDeRegreso(p,tangente) {
+      return (tangente-90)*suave(p,.025,.16)*(1-suave(p,.912,.992));
+    }
     function impulsoDePortada(p) {
       const {vertical,giro,salidaGiro,pendiente}=ruta;
       const preparar=suave(p,0,vertical?.14:Math.min(.16,giro*.48));
@@ -5638,8 +5635,7 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
         extension:.64*preparar+.36*picada,
         lateral:vertical?0:preparar*(1-picada)*enVuelo,
         banco:picada*enVuelo,
-        bajada:vertical?174:-Math.min(120,Math.max(106,90+.84*pendiente)),
-        subida:vertical?-6:Math.max(34,Math.min(65,90-pendiente))
+        bajada:vertical?174:-Math.min(120,Math.max(106,90+.84*pendiente))
       };
     }
 
@@ -5665,7 +5661,6 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       if(!vueloCrecimiento && !destinoCrecimiento)historia.style.removeProperty('--noviembre-visible');
       const nativo=siguiente==='inicio'||siguiente==='quieto';
       const enAire=siguiente==='aire'||siguiente==='vuelo-mes'||vueloCrecimiento||vueloFirma;
-      if(!enAire && siguiente!=='despegue-mes' && siguiente!=='aproximacion')planoDeVuelo=null;
       raiz.classList.toggle('qk-transito-mensual',siguiente==='despegue-mes'||siguiente==='vuelo-mes');
       const enMes=siguiente==='reposo-mes'||siguiente==='mes-estatico';
       if(nativo) {
@@ -5718,13 +5713,6 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       }
       montaje.setAttribute('transform','translate('+x.toFixed(4)+' '+y.toFixed(4)+') rotate('+
         angulo.toFixed(3)+') scale('+(ancho/100).toFixed(6)+') translate(-50.566 -47.1)');
-    }
-    // Only the air is rotated into the path tangent. The turnaround stays on
-    // the same curve; the old slipstream dies out before its side changes.
-    function dibujarEstela(x,y,ancho,tangente,p,empuje) {
-      const giro=suave(Math.abs(1-2*rumbo),.19,.85);
-      const intensidad=suave(p,ruta.giro-.015,ruta.salidaGiro+.045)*(1-suave(p,.735,.856))*giro;
-      pintarEstela(x,y,ancho,tangente+(rumbo>.5?180:0),intensidad,empuje);
     }
     function pintarEstela(x,y,ancho,direccion,intensidad,empuje) {
       if(intensidad<.005 || document.hidden) {
@@ -5964,7 +5952,7 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       const fuera=sy<mensual.inicio-.42*h || sy>mensual.fin+.42*h;
       const iniciando=lugar!=='despegue-mes' && lugar!=='vuelo-mes';
       const marcha=previo===null || objetivo===previo?(haciaArriba?1:0):(objetivo<previo?1:0);
-      retornoMes=iniciando?marcha:moderarGiro(retornoMes,marcha,dt,ruta.vertical?1.7:1.3,false);
+      retornoMes=iniciando?marcha:moderarGiro(retornoMes,marcha,dt,ruta.vertical?1.7:1.3);
       // Brake as the rig turns; accelerate back along the curve once aligned.
       const alineado=1-suave(Math.abs(marcha-retornoMes),.06,.58);
       progresoMes=mensual.compas(previo,objetivo,dt,!visible || fuera,alineado);
@@ -6011,7 +5999,7 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       const rumbo=tangente-180*retornoMes, rad=Math.PI/180;
       const mirar=rumbo+Math.max(-18,Math.min(18,180*(retornoMes-marcha)));
       const direccion={x:Math.cos(rumbo*rad),y:Math.sin(rumbo*rad),
-        lookX:Math.cos(mirar*rad),lookY:Math.sin(mirar*rad),vertical:ruta.vertical,phase:p};
+        lookX:Math.cos(mirar*rad),lookY:Math.sin(mirar*rad),vertical:ruta.vertical,phase:p,regreso:retornoMes};
       const contacto=1-suave(p,0,.025), despegue=suave(p,.006,.082);
       const llegada=suave(p,.85,1), impulso=despegue*(1-llegada);
       const banco=90+rumbo;
@@ -6019,15 +6007,6 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       const angulo=mezclar(reposoDelCalendario,banco,impulso);
       const tecleando=teclado.pose(contacto),estirado=rig.divePose(1,angulo,direccion);
       let pose=rig.blend(tecleando,estirado,despegue);
-      if(despegue<1){
-        // Release the keyboard with each wrist hinged to its moving forearm.
-        for(const lado of ['l','r']){
-          const antebrazo=q=>Math.atan2(q[lado+'w'][1]-q[lado+'e'][1],q[lado+'w'][0]-q[lado+'e'][0])*180/Math.PI;
-          const anguloLocal=((tecleando[lado+'a']-antebrazo(tecleando)+540)%360)-180;
-          const flexion=((estirado[lado+'a']-antebrazo(estirado)-anguloLocal+540)%360)-180;
-          pose[lado+'a']=antebrazo(pose)+anguloLocal+despegue*flexion;
-        }
-      }
       let giro=0, agarre=suave(p,.014,.072)*(1-llegada);
       const aireFrontal=.86*impulso;
       if(llegada>0) {
@@ -6058,9 +6037,34 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       return true;
     }
 
-    let avanceCrecimiento=null, regresoCrecimiento=0;
+    let avanceCrecimiento=null, regresoCrecimiento=0, alabeoCrecimiento=0, reposoCrecimiento=0;
     let segundosOrgullo=0, marcaOrgullo=null;
 
+    function gestoCrecimiento(p) {
+      const extremo=Math.min(p,1-p), recorrido=extremo*suave(extremo,.025,.14);
+      const salida=suave(p,0,.105), freno=suave(p,.895,1);
+      return {tramo:p<.5?recorrido:1-recorrido,salida,freno,impulso:salida*(1-freno)};
+    }
+    function medirCompasCrecimiento(viaje,vertical) {
+      function centro(p,sy) {
+        const {tramo}=gestoCrecimiento(p), xy=viaje.punto(tramo,sy);
+        if(!vertical)xy[1]+=(p-tramo)*(viaje.fin-viaje.inicio);
+        return xy;
+      }
+      let ultimaIda=0, ultimaVuelta=0, grados=0;
+      const cercanos=g=>((g+180)%360+360)%360-180;
+      function giro(p) {
+        const {tramo,impulso}=gestoCrecimiento(p);
+        const rumbo=vertical?90:viaje.rumboVisible(tramo);
+        const ida=cercanos(rumbo+90)*impulso, vuelta=cercanos(rumbo-90)*impulso;
+        // The same clock runs backwards. Budget for whichever direction
+        // needs more rotation between these points on the visible curve.
+        grados+=Math.max(Math.abs(cercanos(ida-ultimaIda)),Math.abs(cercanos(vuelta-ultimaVuelta)));
+        ultimaIda=ida;ultimaVuelta=vuelta;
+        return grados;
+      }
+      return medirCompas(viaje.inicio,viaje.fin,centro,2.9,giro);
+    }
     function detenerOrgullo() {
       marcaOrgullo=null;
       orgullo.limpiar();
@@ -6087,7 +6091,11 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       if(!transferencia && enCapitulo && tiempoMes<duracionLlegada && sy<ruta.guia.final)return false;
       const siguienteVisible=lugar==='vuelo-crecimiento' && sy<=ruta.firma.salidaFirma+.46*ruta.h;
       const salto=previo===null || !visible || sy<viaje.inicio-.4*ruta.h || (sy>viaje.fin+.42*ruta.h && !siguienteVisible);
-      const p=viaje.compas(previo,objetivo,dt,salto);
+      const entrando=lugar!=='vuelo-crecimiento';
+      const volver=objetivo===previo || previo===null?(haciaArriba?1:0):Number(objetivo<previo);
+      regresoCrecimiento=entrando?volver:moderarGiro(regresoCrecimiento,volver,dt,ruta.vertical?1.7:1.3);
+      const alineado=1-suave(Math.abs(regresoCrecimiento-volver),.03,.30);
+      const p=viaje.compas(previo,objetivo,dt,salto,alineado);
       avanceCrecimiento=p;
       if(p===0) {
         regresoCrecimiento=0;segundosOrgullo=0;
@@ -6111,22 +6119,22 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
         return true;
       }
 
-      const entrando=lugar!=='vuelo-crecimiento';
       cambiarLugar('vuelo-crecimiento');
       if(entrando) {
-        regresoCrecimiento=haciaArriba?1:0;
+        alabeoCrecimiento=0;reposoCrecimiento=0;
         puesto.quitar();teclado.detail(0);descanso.limpiar();
       }
-      const volver=(previo!==null && p!==previo?p<previo:haciaArriba)?1:0;
-      regresoCrecimiento=moderarGiro(regresoCrecimiento,volver,dt,.85,false);
-      const tangente=ruta.vertical?{x:0,y:1}:viaje.direccion(p);
-      const rumboVuelo=Math.atan2(tangente.y,tangente.x)*180/Math.PI;
-      const direccion=orientarVuelo('crecimiento',p,rumboVuelo-180*regresoCrecimiento,rumboVuelo-180*volver,dt);
-      // Set the shoulders and hands before the sternum crosses the November guide.
-      const salida=suave(p,0,.122),freno=suave(p,.886,1);
-      const impulso=salida*(1-freno);
-      const rumboCuerpo=Math.atan2(direccion.x,-direccion.y)*180/Math.PI;
-      const rollCrecimiento=inclinarVuelo(ruta.vertical?174-180*regresoCrecimiento:Math.max(-140,Math.min(140,rumboCuerpo)),dt,impulso);
+      // Follow the existing curve. The shoulders prepare at the endpoint before
+      // the body travels, in both reading directions.
+      const {tramo,salida,freno,impulso}=gestoCrecimiento(p);
+      const tangente=ruta.vertical?90:viaje.rumboVisible(tramo);
+      const rumbo=tangente-180*regresoCrecimiento, rad=Math.PI/180;
+      const mirada=rumbo+Math.max(-18,Math.min(18,180*(regresoCrecimiento-volver)));
+      const direccion={x:Math.cos(rumbo*rad),y:Math.sin(rumbo*rad),
+        lookX:Math.cos(mirada*rad),lookY:Math.sin(mirada*rad),vertical:ruta.vertical,phase:tramo,regreso:regresoCrecimiento};
+      alabeoCrecimiento+=((90+rumbo-alabeoCrecimiento+540)%360+360)%360-180;
+      if(impulso===1)reposoCrecimiento=Math.round(alabeoCrecimiento/360)*360;
+      const rollCrecimiento=mezclar(reposoCrecimiento,alabeoCrecimiento,impulso);
 
       const vuelo=rig.divePose(1,rollCrecimiento,direccion);
       const segundosNov=origenRelojGuia?Math.max(0,(ahora-origenRelojGuia)/1000):null;
@@ -6150,20 +6158,20 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
         segundosOrgullo=0;
       }
 
-      const [x,yRuta]=viaje.punto(p);
-      const acople=1-suave(p,0,.09);
-      const y=yRuta+(ruta.vertical?0:compensarCamara(sy,viaje.inicio,viaje.fin,p))+acople*viaje.desplazamientoGuia(sy);
+      const [x,yRuta]=viaje.punto(tramo);
+      const acople=1-suave(tramo,0,.09);
+      const y=yRuta+(ruta.vertical?0:compensarCamara(sy,viaje.inicio,viaje.fin,tramo))+acople*viaje.desplazamientoGuia(sy);
       const flotacion=(1-salida)*gestos.desplazamiento(segundosNov)+freno*gestoFinal.altura;
       situar(x,y-sy+flotacion,ruta.a.w,rollCrecimiento);
       const empuje=previo===null?0:limitar(Math.abs(p-previo)*(viaje.fin-viaje.inicio)/(dt*1.15));
-      pintarEstela(x,y-sy,ruta.a.w,ejeDeVuelo,
+      pintarEstela(x,y-sy+flotacion,ruta.a.w,rumbo,
         .86*impulso*suave(Math.abs(1-2*regresoCrecimiento),.18,.82),empuje);
       return true;
     }
 
     let relojFirma=null, tiempoFirma=0, confetiLanzado=false, capaConfeti=null;
     let orientacionFirma=0, ultimoCuadroFirma=-1, medidasFirma=null;
-    let tramoFirma=null, avanceFirma=0;
+    let tramoFirma=null, avanceFirma=0, reposoFirma=0;
     const giroFinal=1280, lanzarEn=giroFinal+480, finDelSaludo=giroFinal+780;
     const manosFirma=['left','right'].map(lado=>actor.querySelector('[data-part="hand-'+lado+'"]'));
     function limpiarConfeti() {
@@ -6236,17 +6244,51 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       }
       if(aLaVista && tiempoFirma<finDelSaludo)pedir();
     }
+    function medirTramoFirma(r,saliendo) {
+      const inicio=saliendo?r.salidaFirma:r.entradaFirma, fin=saliendo?r.finSalida:r.llegadaFirma;
+      const original=saliendo?r.partida:r.llegada;
+      const estacionY=saliendo?original[0][1]-inicio:original[3][1]-fin;
+      const altura=(saliendo?.44:.52)*ruta.h;
+      const y0=saliendo?estacionY:estacionY-altura;
+      // The same curve drives the displayed centre, the joints and the wake.
+      // Its offstage end is below the departing station or above the landing.
+      const curva=original.map(([x,y])=>[x,y0+altura*(y-original[0][1])/(original[3][1]-original[0][1])]);
+      const vertical=saliendo?r.partidaVertical:r.llegadaVertical;
+      const u=p=>limitar(saliendo?(p-.052)/.948:p/.948);
+      const postura=p=>suave(saliendo?p:1-p,.006,.14);
+      function punto(p,sy) {
+        const q=u(p);
+        if(vertical)return vertical(q,sy);
+        const [x,y]=bezierVuelo(curva,ritmoVuelo(q));
+        return [x,y+sy+arrastreDeEstacion(sy,inicio,fin,p)];
+      }
+      function rumbo(p) {
+        if(vertical)return 90;
+        const t=ritmoVuelo(u(p)),s=1-t;
+        const [x,y]=[0,1].map(i=>s*s*(curva[1][i]-curva[0][i])+2*s*t*(curva[2][i]-curva[1][i])+t*t*(curva[3][i]-curva[2][i]));
+        return Math.atan2(y,x)*180/Math.PI;
+      }
+      const compas=medirCompas(inicio,fin,punto,saliendo?2.35:2.8,p=>{
+        const banco=rumbo(p)+90, neutro=vertical?0:360*Math.round(banco/360);
+        return mezclar(neutro,banco,postura(p));
+      });
+      return {inicio,fin,punto,rumbo,postura,compas};
+    }
     function dibujarFirma(sy,ahora,dt,visible) {
       const r=ruta.firma;
       // Switch legs while the rig is outside the frame. A chapter jump can
       // establish its destination immediately, without replaying skipped legs.
       const saliendo=sy<(r.finSalida+r.entradaFirma)/2;
-      const inicio=saliendo?r.salidaFirma:r.entradaFirma, fin=saliendo?r.finSalida:r.llegadaFirma;
+      const vueloFinal=saliendo?r.vueloDesdeCrecimiento:r.vueloAlCierre;
+      const {inicio,fin}=vueloFinal;
       const objetivo=limitar((sy-inicio)/Math.max(1,fin-inicio));
       const continuo=tramoFirma===saliendo && visible && sy>=inicio-.42*ruta.h && sy<=fin+.42*ruta.h;
       const previo=avanceFirma;
-      const compas=saliendo?r.compasSalida:r.compasLlegada;
-      const p=compas(previo,objetivo,dt,!continuo);
+      const nuevaSalida=lugar!=='vuelo-firma' || tramoFirma!==saliendo || (saliendo?previo===1:previo===0);
+      const meta=continuo && objetivo!==previo?(objetivo<previo?1:0):(haciaArriba?1:0);
+      orientacionFirma=nuevaSalida?meta:moderarGiro(orientacionFirma,meta,dt,ruta.vertical?1.7:1.3);
+      const alineado=1-suave(Math.abs(meta-orientacionFirma),.06,.58);
+      const p=vueloFinal.compas(previo,objetivo,dt,!continuo,alineado);
       tramoFirma=saliendo;avanceFirma=p;
       if(saliendo && p===0){reiniciarFirma();return false;}
       if(!saliendo && p===1){
@@ -6260,22 +6302,18 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       const enMargen=saliendo?p===1:p===0;
       const entrando=lugar!=='vuelo-firma';
       cambiarLugar('vuelo-firma');
-      if(entrando){puesto.quitar();teclado.detail(0);orientacionFirma=haciaArriba?1:0;}
+      if(entrando){puesto.quitar();teclado.detail(0);}
       if(enMargen || saliendo || p<.77)reiniciarFirma();
       aire.hidden=enMargen;
       if(enMargen)return true;
-      const curva=saliendo?r.partida:r.llegada;
-      const t=p*p*(3-2*p);
-      const [x,yRuta]=ruta.vertical?(saliendo?r.partidaVertical:r.llegadaVertical)(p):bezierVuelo(curva,t);
-      const y=yRuta+(ruta.vertical?0:compensarCamara(sy,inicio,fin,p));
-      const meta=(continuo && p!==previo?p<previo:haciaArriba)?1:0;
-      orientacionFirma=moderarGiro(orientacionFirma,meta,dt,.85,false);
-      const anterior=ruta.vertical?null:bezierVuelo(curva,Math.max(0,t-.002));
-      const posterior=ruta.vertical?null:bezierVuelo(curva,Math.min(1,t+.002));
-      const rumbo=ruta.vertical?90:Math.atan2(posterior[1]-anterior[1],posterior[0]-anterior[0])*180/Math.PI;
-      const direccion=orientarVuelo(saliendo?'salida-final':'llegada-final',p,rumbo-180*orientacionFirma,rumbo-180*meta,dt);
-      const impulso=saliendo?suave(p,0,.14):1-suave(p,.904,1);
-      const angulo=inclinarVuelo(ruta.vertical?174-180*orientacionFirma:Math.max(-138,Math.min(138,Math.atan2(direccion.x,-direccion.y)*180/Math.PI)),dt,impulso);
+      const [x,y]=vueloFinal.punto(p,sy);
+      const rumbo=vueloFinal.rumbo(p)-180*orientacionFirma;
+      const rad=Math.PI/180, mirada=rumbo+Math.max(-16,Math.min(16,180*(orientacionFirma-meta)));
+      const direccion={x:Math.cos(rumbo*rad),y:Math.sin(rumbo*rad),
+        lookX:Math.cos(mirada*rad),lookY:Math.sin(mirada*rad),vertical:ruta.vertical,phase:p,regreso:orientacionFirma};
+      const impulso=vueloFinal.postura(p), banco=rumbo+90;
+      if(nuevaSalida || impulso===1)reposoFirma=ruta.vertical?0:360*Math.round(banco/360);
+      const angulo=mezclar(reposoFirma,banco,impulso);
       const vuelo=rig.divePose(1,angulo,direccion);
       const despedida=saliendo?orgullo.muestra(segundosOrgullo,ruta.miradaAlDato):null;
       const saludo=saliendo?null:gestoFirma();
@@ -6291,7 +6329,7 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
         punos.set(impulso);
       }
       situar(x,y-sy+(saliendo?despedida.altura*(1-impulso):0),ruta.a.w,angulo);
-      pintarEstela(x,y-sy,ruta.a.w,ejeDeVuelo,.84*impulso*suave(Math.abs(1-2*orientacionFirma),.2,.84),1);
+      pintarEstela(x,y-sy,ruta.a.w,rumbo,.84*impulso*suave(Math.abs(1-2*orientacionFirma),.2,.84),alineado);
       return true;
     }
     function actualizar(sy,ahora,cambioDeLectura) {
@@ -6331,7 +6369,31 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       ultimo=ahora;
       const delta=sy-marca;
       if(Math.abs(delta)>4) {haciaArriba=delta<0; marca=sy;}
-      visto=ruta.compasPortada(visto,objetivo,dt,sy>ruta.finPortada+.72*h || !visible);
+      if(origenDelAtajo!==null){
+        // A navigation link skips chapters. Let the departure scroll away,
+        // then mount the greeting in its own section before it comes into view.
+        if(sy===0 || sy<origenDelAtajo-.86*h || sy<=ruta.finPortada){
+          if(lugar!=='inicio'){
+            salirDeMes();reiniciarFirma();sincronizarVuelos();
+            cambiarLugar('inicio');puesto.quitar();portatil.pauseAnimations();
+            if(visible)actor.unpauseAnimations();
+          }
+          visto=0;rumbo=0;relojDeVuelta=false;
+          if(ruta.vertical)variableDeScroll(hero,'--viaje-portada','0');
+          variableDeScroll(hero,'--pista-qk','1');
+        }
+        if(sy<=1)origenDelAtajo=null;
+        return;
+      }
+      const enPortada=objetivo<1 || (visto!==null && visto<1);
+      const invertir=anterior===null || anterior===objetivo?(haciaArriba?1:0):(objetivo<anterior?1:0);
+      if(enPortada)rumbo=moderarGiro(rumbo,invertir,dt,ruta.vertical?1.7:1.3);
+      const deVuelta=enPortada && invertir===1;
+      const compas=deVuelta?ruta.compasRegreso:ruta.compasPortada;
+      if(relojDeVuelta!==deVuelta && anterior!==null)compas(anterior,anterior,dt,true);
+      relojDeVuelta=deVuelta;
+      const alineado=enPortada?1-suave(Math.abs(rumbo-invertir),.06,.58):1;
+      visto=compas(visto,objetivo,dt,sy>ruta.finPortada+.72*h || !visible,alineado);
       const p=visto;
       if(ruta.vertical)variableDeScroll(hero,'--viaje-portada',p.toFixed(4));
       variableDeScroll(hero,'--pista-qk',String(1-suave(p,.09,.31)));
@@ -6363,43 +6425,42 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
         rumbo=1;
         return;
       }
-      // Path and attitude have separate clocks. The sternum stays on the
-      // pencil curve while shoulders lead, the back rolls and the chin lifts.
       const antes=ruta.vertical?.18:ruta.giro, despues=ruta.vertical?.39:ruta.salidaGiro;
-      // The shoulders, fists and bank lead the rightward push. On a touch
-      // screen the same anticipation feeds directly into the vertical dive.
       const gesto=impulsoDePortada(p);
-      const recoger=suave(p,.625,.942);
-      const equipo=suave(p,.944,.993);
-      const contacto=suave(p,.916,1);
-      const meta=(anterior!==null && p!==anterior?p<anterior:haciaArriba)?1:0;
-      rumbo=moderarGiro(rumbo,meta,dt,.85,false);
-      const guiada=mezclar(gesto.bajada,gesto.subida,rumbo);
-      const ladear=mezclar(46,-36,rumbo)*gesto.lateral;
+      const fase=mezclar(p,faseRegresoPortada(p),rumbo);
+      const tangente=tangenteDeVuelo(fase),rad=Math.PI/180;
+      const proa=tangente-180*rumbo;
+      const mirada=proa+Math.max(-18,Math.min(18,180*(rumbo-invertir)));
+      const direccion={x:Math.cos(proa*rad),y:Math.sin(proa*rad),
+        lookX:Math.cos(mirada*rad),lookY:Math.sin(mirada*rad),vertical:ruta.vertical,phase:p,regreso:rumbo};
+      const angulo=mezclar(46*gesto.lateral+gesto.bajada*gesto.banco,bancoDeRegreso(p,tangente),rumbo);
+      const recoger=mezclar(suave(p,.625,.942),suave(p,.914,.994),rumbo);
+      const equipo=mezclar(suave(p,.944,.993),suave(p,.972,.997),rumbo);
+      const contacto=mezclar(suave(p,.916,1),suave(p,.966,1),rumbo);
       const cerca=p>=.868;
       cambiarLugar(cerca?'aproximacion':'aire');
-      const tangente=tangenteDeVuelo(p);
-      const direccion=orientarVuelo('portada',p,tangente-180*rumbo,tangente-180*meta,dt);
-      const angulo=ladear+inclinarVuelo(guiada,dt,gesto.banco);
       if(!cerca)puesto.quitar();
-      const vuelo=rig.divePose(gesto.extension,angulo,direccion);
+      const extension=mezclar(gesto.extension,suave(p,.025,.16),rumbo);
+      const vuelo=rig.divePose(extension,angulo,direccion);
       const pose=rig.blend(vuelo,teclado.pose(contacto),recoger);
       rig.setJoints(pose);
-      const aireDeFrente=suave(p,antes,despues+.06)*(1-suave(p,.72,.92));
+      const vueloDeVuelta=extension*(1-recoger);
+      const aireDeFrente=mezclar(suave(p,antes,despues+.06)*(1-suave(p,.72,.92)),vueloDeVuelta,rumbo);
       espalda.set(pose.backRoll||0,aireDeFrente,pose.flightSide??1);
       teclado.detail(contacto);
-      punos.set(suave(p,.023,.17)*(1-suave(p,.708,.87)));
-      const [x,y]=puntoEnCurva(p,sy);
+      punos.set(mezclar(suave(p,.023,.17)*(1-suave(p,.708,.87)),suave(p,.035,.17)*(1-suave(p,.924,.978)),rumbo));
+      const [x,y]=puntoEnCurva(fase,sy);
       if(cerca) {
         const mesaX=26+(x-b.x)/unidadPuesto, mesaY=-12+(y-b.y)/unidadPuesto;
         situar(mesaX,mesaY,anchoEnPuesto,angulo);
-        puesto.presentar(mesaX,mesaY,angulo,suave(p,.884,.964),contacto,equipo,false);
+        const giroAlTeclado=mezclar(suave(p,.884,.964),suave(p,.949,.985),rumbo);
+        puesto.presentar(mesaX,mesaY,angulo,giroAlTeclado,contacto,equipo,false);
       } else {
         situar(x,y-sy,a.w,angulo);
         const empuje=anterior===null?0:limitar(Math.abs(p-anterior)*fin/(dt*1.25));
-        if(ruta.vertical)pintarEstela(x,y-sy,a.w,90-180*rumbo,
-          suave(p,.10,.35)*(1-suave(p,.72,.87))*suave(Math.abs(1-2*rumbo),.19,.85),empuje);
-        else dibujarEstela(x,y-sy,a.w,tangente,p,empuje);
+        const ida=ruta.vertical?suave(p,.10,.35)*(1-suave(p,.72,.87)):
+          suave(p,ruta.giro-.015,ruta.salidaGiro+.045)*(1-suave(p,.735,.856));
+        pintarEstela(x,y-sy,a.w,proa,mezclar(ida,vueloDeVuelta,rumbo)*suave(Math.abs(1-2*rumbo),.19,.85),empuje);
       }
     }
     function invalidar() {medir=true; pedir();}
@@ -6410,10 +6471,18 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
     }
     window.addEventListener('resize',invalidar);
     document.addEventListener('click',e=>{
+      const enlace=e.target.closest?.('a[href="#inicio"]');
+      if(enlace && activo && e.button===0 && !e.defaultPrevented && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey && scrollY>1.8*innerHeight)origenDelAtajo=scrollY;
       if(!e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey && e.target.closest?.('a[href="#mes-a-mes"]')) {
         entradaMensualPorEnlace=true;pedir();
       }
     });
+    function interrumpirAtajo() {
+      if(origenDelAtajo===null)return;
+      origenDelAtajo=null;sincronizarVuelos();pedir();
+    }
+    for(const tipo of ['wheel','touchstart','pointerdown','keydown','pagehide'])
+      window.addEventListener(tipo,interrumpirAtajo,{passive:true});
     window.addEventListener('hashchange',()=>{
       entradaMensualPorEnlace=location.hash==='#mes-a-mes';pedir();
     });
