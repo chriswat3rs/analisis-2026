@@ -760,25 +760,25 @@ body{overflow-x:clip}
 .display-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#788396;font-size:clamp(8px,1.1cqw,12px);line-height:1.2;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
 .display-toolbar span:last-child{font-weight:400;letter-spacing:0;text-transform:none}
 .display-summary{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex:none}
-.display-month{color:var(--azul-acento);font-size:clamp(12px,2.35cqw,25px);line-height:1.2;font-weight:700;margin-bottom:.6cqw}
+.display-month{color:var(--azul-acento);font-size:clamp(15px,2.8cqw,30px);line-height:1.15;font-weight:700;margin-bottom:.45cqw}
 .display-total{display:flex;align-items:baseline;gap:1cqw;white-space:nowrap}
-.display-total strong{font-size:clamp(23px,4.6cqw,52px);line-height:1.05;font-weight:800;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
-.display-total>span,.display-average>span{font-size:clamp(8px,1.25cqw,13px);line-height:1.5;font-weight:400;color:#788396}
+.display-total strong{font-size:clamp(30px,5.8cqw,66px);line-height:1;font-weight:800;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.display-total>span,.display-average>span{font-size:clamp(11px,1.52cqw,16px);line-height:1.25;font-weight:400;color:#4f607d}
 .display-average{text-align:right;display:flex;flex-direction:column;gap:.3cqw;padding-bottom:.2cqw}
-.display-average>strong{font-size:clamp(16px,2.65cqw,29px);line-height:1.1;font-weight:700;font-variant-numeric:tabular-nums}
+.display-average>strong{font-size:clamp(21px,3.45cqw,39px);line-height:1.05;font-weight:700;font-variant-numeric:tabular-nums}
 #mes-a-mes .hist-lienzo{flex:1 1 0;min-height:0;clip-path:none!important;transition:none}
-.laptop .hist-eje,.laptop .hist-ref-et{font:400 clamp(8px,1.2cqw,13px)/1 var(--font-sans)}
-.laptop .hist-eje.activo{font-weight:700}.laptop .hist-valor{font:700 clamp(9px,1.45cqw,16px)/1 var(--font-sans)}
+.laptop .hist-eje,.laptop .hist-ref-et{font:400 clamp(10px,1.45cqw,15px)/1 var(--font-sans);fill:#536381}
+.laptop .hist-eje.activo{font-weight:700;fill:var(--azul-tinta)}.laptop .hist-valor{font:700 clamp(12px,1.85cqw,19px)/1 var(--font-sans)}
 .display-footer [hidden]{display:none!important}
-.display-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;flex:none;color:#788396;font-size:clamp(8px,1.05cqw,11px);line-height:1.4}
+.display-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;flex:none;color:#536381;font-size:clamp(10px,1.28cqw,14px);line-height:1.3}
 .laptop .hist-leyenda{font:inherit;gap:.6cqw}.laptop .hist-leyenda::before{width:1.15cqw;height:1.15cqw;min-width:7px;min-height:7px}
 .display-summary.cambio{animation:pantalla-mes 420ms cubic-bezier(.2,.7,.3,1) both}
 @keyframes pantalla-mes{from{opacity:.35;transform:translateY(6px)}to{opacity:1;transform:none}}
 @keyframes pantalla-mes-b{from{opacity:.35;transform:translateY(6px)}to{opacity:1;transform:none}}
 @media screen and (prefers-reduced-motion:no-preference){.anim .display-summary.cambio[data-pulso-b]{animation-name:pantalla-mes-b}}
 .historia .paso-num{display:none}
-.historia .paso-mes{font-size:12px;line-height:1.6;font-weight:700;text-transform:uppercase;letter-spacing:.12em}
-.historia .paso-txt{font-size:clamp(20px,2.05vw,30px);line-height:1.45;font-weight:700;color:#303030;max-width:25ch}
+.historia .paso-mes{font-size:14px;line-height:1.4;font-weight:700;text-transform:uppercase;letter-spacing:.1em}
+.historia .paso-txt{font-size:clamp(22px,2.3vw,34px);line-height:1.32;font-weight:700;color:#303030;max-width:25ch}
 .historia .paso-dias{font-size:12px;line-height:1.7;font-weight:400}
 @media(min-width:901px){
  .historia{grid-template-columns:minmax(0,.68fr) minmax(0,1.5fr);column-gap:clamp(28px,3vw,56px)}
@@ -1054,7 +1054,7 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
        The keyboard adds up to .20234375 × 1.94 times the lid's sizing unit. */
     --aire-tapa:clamp(22px,6cqi,42px);
     --espacio-portatil:calc(100svh - max(60px,var(--qk-tope-enlace,20svh)) - var(--alto-guia) - var(--aire-guia) - 48px - env(safe-area-inset-bottom));
-    --alto-marco:clamp(186px,min(83cqi,52svh,calc((var(--espacio-portatil) + var(--aire-tapa)) / 1.393)),470px);
+    --alto-marco:clamp(min(235px,42svh),min(83cqi,52svh,calc((var(--espacio-portatil) + var(--aire-tapa)) / 1.393)),470px);
     --ancho-equipo:min(100cqi,calc(var(--alto-marco) * 1.94),calc(91svw - 8px));
     --alto-tapa:calc(var(--alto-marco) - var(--aire-tapa));
     /* Source artwork is 1536 × 1024. Its hinge starts at row 765. */
@@ -1093,14 +1093,14 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
     gap:clamp(4px,1.7cqw,11px);
   }
   #mes-a-mes .display-toolbar {font-size:clamp(9px,1.85cqw,12px)}
-  #mes-a-mes .display-month {font-size:clamp(15px,3.9cqw,24px);margin-bottom:1px}
-  #mes-a-mes .display-total strong {font-size:clamp(27px,7.2cqw,43px)}
-  #mes-a-mes .display-average>strong {font-size:clamp(19px,4.7cqw,28px)}
+  #mes-a-mes .display-month {font-size:clamp(17px,4.2cqw,27px);margin-bottom:1px}
+  #mes-a-mes .display-total strong {font-size:clamp(32px,8.5cqw,52px)}
+  #mes-a-mes .display-average>strong {font-size:clamp(23px,5.4cqw,34px)}
   #mes-a-mes :is(.display-total>span,.display-average>span,.display-footer) {
-    font-size:clamp(10px,2.05cqw,13px);line-height:1.22;color:#4f607d;
+    font-size:clamp(11px,2.2cqw,14px);line-height:1.2;color:#4f607d;
   }
   #mes-a-mes :is(.hist-eje,.hist-ref-et) {font-size:clamp(10px,1.95cqw,13px)}
-  #mes-a-mes .hist-valor {display:block;font-size:clamp(11px,2.3cqw,15px)}
+  #mes-a-mes .hist-valor {display:block;font-size:clamp(13px,2.7cqw,18px);translate:0 6px}
   #mes-a-mes .qk-bateria-display {font-size:clamp(14px,3.3cqw,22px)}
   #mes-a-mes .qk-bateria-estado {font-size:clamp(11px,2.55cqw,15px)}
   #mes-a-mes .qk-bateria-display svg {width:clamp(32px,7.5cqw,54px)}
@@ -1115,10 +1115,10 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
   }
   .qk-capitulo-mensual #mes-a-mes .qk-guia-texto {min-height:0;padding:0;gap:6px}
   #mes-a-mes .historia .paso-txt {
-    max-width:36ch;font-size:clamp(16px,4.6cqi,24px);line-height:1.3;text-wrap:pretty;
+    max-width:36ch;font-size:clamp(18px,5cqi,27px);line-height:1.27;text-wrap:pretty;
   }
-  #mes-a-mes .historia .paso-mes {font-size:clamp(10px,1.9cqi,12px);line-height:1.3}
-  #mes-a-mes .historia .paso-dias {font-size:clamp(10px,1.9cqi,12px);line-height:1.45}
+  #mes-a-mes .historia .paso-mes {font-size:clamp(12px,2.1cqi,14px);line-height:1.3}
+  #mes-a-mes .historia .paso-dias {font-size:clamp(11px,2cqi,13px);line-height:1.4}
   .qk-capitulo-mensual #mes-a-mes .hist-pasos {
     grid-area:1/1;padding:var(--qk-inicio-carga) 0 28svh;
   }
@@ -1131,7 +1131,7 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
     .qk-capitulo-mensual #mes-a-mes>.marco>.intro {gap:8px;margin-bottom:14px}
     @media (max-height:850px) and (max-aspect-ratio:6/5) {
       #mes-a-mes .laptop-display {padding-block:1.4cqw;gap:.8cqw}
-      #mes-a-mes .display-total strong {font-size:clamp(28px,5.8cqw,40px)}
+      #mes-a-mes .display-total strong {font-size:clamp(34px,7.2cqw,48px)}
     }
   }
 }
@@ -1180,8 +1180,8 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
     #mes-a-mes .historia.qk-leyendo .hist-grafica {top:clamp(8px,calc(100svh - var(--alto-equipo) - 5px),var(--tope-equipo))}
     @media (max-height:500px) {
       #mes-a-mes .laptop-display {padding-block:6px;gap:4px}
-      #mes-a-mes .display-total strong {font-size:clamp(26px,5.6cqw,36px)}
-      #mes-a-mes .display-month {font-size:clamp(15px,3.25cqw,20px)}
+      #mes-a-mes .display-total strong {font-size:clamp(31px,7cqw,43px)}
+      #mes-a-mes .display-month {font-size:clamp(17px,3.8cqw,24px)}
     }
     #mes-a-mes .laptop {transform-origin:50% 0}
     .anim #mes-a-mes .laptop {transition:transform 310ms var(--ease-salida)}
@@ -1190,7 +1190,7 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
     .qk-capitulo-mensual #mes-a-mes .qk-guia-mensual {grid-area:1/2;grid-template-columns:1fr;gap:4px;margin-top:0;top:var(--qk-tope-guia);z-index:3}
     .qk-capitulo-mensual #mes-a-mes .qk-guia-escena {grid-row:1}
     .qk-capitulo-mensual #mes-a-mes .hist-pasos {grid-area:1/2;padding:24svh 0}
-    #mes-a-mes .historia .paso-txt {font-size:clamp(15px,2.3cqi,19px)}
+    #mes-a-mes .historia .paso-txt {font-size:clamp(17px,2.6cqi,22px)}
   }
 }
 
@@ -3025,11 +3025,9 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
 
     if (!etiqueta || !geo) return;
     if (i < 0) { etiqueta.textContent = ''; return; }
-    if(geo.w<520) {
-      const aLaDerecha=i<MESES.length/2;
-      geo.referencia.setAttribute('x',aLaDerecha?geo.w-geo.margen.r:geo.margen.l);
-      geo.referencia.setAttribute('text-anchor',aLaDerecha?'end':'start');
-    }
+    const referenciaDerecha = i < MESES.length / 2;
+    geo.referencia.setAttribute('x', referenciaDerecha ? geo.w - geo.margen.r : geo.margen.l);
+    geo.referencia.setAttribute('text-anchor', referenciaDerecha ? 'end' : 'start');
     var d = MESES[i];
     etiqueta.setAttribute('x', geo.cx(i));
     etiqueta.setAttribute('y', geo.y(d.v) - tok('--space-3'));
@@ -3393,9 +3391,6 @@ function createQKnowDive(svg) {
     ejesBase.set(el,{x:dx/l,y:dy/l,l});
   }
   const neck=[400,347];
-  // The socket is hidden behind the broad lower shell. Pitch follows the socket
-  // while banking rolls closer to the head centre to keep the face forward.
-  const flightNeckAngle=54*rad;
   const neutralExtras={backRoll:0,flightFace:0,flightSide:1,visorHeight:0,headAim:0,neckLean:0,headTurn:0,headAngle:0,headNod:0,bodyTurn:0,handScaleLX:1,handScaleLY:1,handScaleRX:1,handScaleRY:1,thrust:1};
   let base=null, time=0, restY=0;
   function matrix(el) {
@@ -3445,10 +3440,7 @@ function createQKnowDive(svg) {
     const size=mix(al,bl,p);
     return [v[0]*size,v[1]*size];
   }
-  function palmRoll(a,b,p,side){
-    const vector=deg=>[Math.cos((deg+90)*rad),Math.sin((deg+90)*rad)];
-    return angle(blendFlightRay(vector(a),vector(b),p,side))-90;
-  }
+  const signed=deg=>((deg%360+540)%360)-180;
   function divePose(amount,worldRoll=-114,direction){
     const b=capture(), p=clamp(amount);
     const pose={...b,flightTransition:true};
@@ -3467,24 +3459,17 @@ function createQKnowDive(svg) {
     pose.idleWeight=1-body;pose.flightFace=body;
     const roll=worldRoll*rad,neckFollow=reach(p,.14,.87);
     const vertical=heading.vertical===true;
-    const rollAngle=Math.atan2(Math.sin(roll),Math.cos(roll))/rad;
-    const diagonal=1-reach(Math.abs(rollAngle),126,180);
-    // In the diagonal view lift the chin around the socket, then level the
-    // visor in its projected plane. A vertical dive keeps the helmet aligned
-    // with the spine instead of twisting it 180 degrees through the neck.
-    pose.neckLean=-Math.sin(roll)*(vertical?.50:1);
-    const estabilizacion=vertical?(-27*Math.sin(roll)-8*(1-Math.cos(roll))):
-      -diagonal*(rollAngle-17*Math.sin(roll));
-    // On the way back the chassis leads the turn. The visor can glance
-    // ahead without counter-rotating the neck through a right angle.
-    pose.headBank=neckFollow*mix(estabilizacion,32*Math.tanh(estabilizacion/32),clamp(heading.regreso||0));
+    // The visor follows the chest through the turn. A small counter-tilt
+    // at the neck lets the eyes lead without wrenching the head off its mount.
+    const braking=Math.sin(Math.PI*clamp(heading.regreso??0))**2;
+    pose.headBank=-Math.sin(roll)*(vertical?13:23)*neckFollow;
     const faceRoll=roll+pose.headBank*rad;
     const lateral=lookX*Math.cos(faceRoll)+lookY*Math.sin(faceRoll);
     const elevation=-lookX*Math.sin(faceRoll)+lookY*Math.cos(faceRoll);
     pose.headTurn=(.50*lateral-.19)*neckFollow;
     pose.visorHeight=(11*elevation-2)*neckFollow;
-    pose.headNod=(vertical?8:8+19*Math.abs(Math.sin(roll)))*neckFollow+2*trim;
-    pose.thrust=1+.33*extend+.025*trim;
+    pose.headNod=(2+2.5*braking)*neckFollow+.6*trim;
+    pose.thrust=1+(.33-.14*braking)*extend+.025*trim;
     for(const side of sides){
       const k=side.toLowerCase(),left=side==='L',sign=left?-1:1;
       const s0=b[k+'s'],e0=b[k+'e'],w0=b[k+'w'];
@@ -3497,13 +3482,17 @@ function createQKnowDive(svg) {
       const lag=left?.042:0;
       const shoulderLift=reach(p,.025+lag,.72+lag);
       const shoulder=[
-        400+(s0[0]-400)*(1-(vertical?.13:.35)*body)+7*sideView*body,
-        s0[1]-(left?35:42)*shoulderLift+sign*2.6*trim
+        400+(s0[0]-400)*(1-.105*Math.abs(pose.bodyTurn)),
+        s0[1]-(left?6:9)*shoulderLift+sign*1.2*trim
       ];
       const viaU=unit3([sign*.78,left?.14:-.13,.48]);
       const viaF=unit3([sign*.66,-.43,.56]);
-      const tipU=vertical?sign*(left?.27:.32):.28*Math.sin(roll)-sign*.30;
-      const tipF=vertical?sign*.065:.20*Math.sin(roll)-sign*.14;
+      // Keep the fists clear of the helmet. During a reversal the shoulders
+      // flare, elbows bend and the arms extend again into the new heading.
+      const drift=vertical?0:Math.sin(roll);
+      const temple=Math.max(0,-sign*drift);
+      const tipU=sign*((left?.19:.32)+.62*braking+.22*temple)+.10*drift;
+      const tipF=sign*((left?.035:.09)-.31*braking+.26*temple)+.06*drift;
       const endU=unit3([tipU,-1,(left?.27:.12)+sign*.027*trim]);
       const endF=unit3([tipF+.024*trim,-1,left?.19:.07]);
       const upper=interp3(interp3(startU,viaU,reach(p,.025+lag,.48+lag)),
@@ -3513,8 +3502,9 @@ function createQKnowDive(svg) {
       const elbow=shoulder.map((v,i)=>v+lu*upper[i]);
       const wrist=elbow.map((v,i)=>v+lf*fore[i]);
       pose[k+'s']=shoulder;pose[k+'e']=elbow;pose[k+'w']=wrist;
-      const palm=angle(fore)-90+sign*(5*extend+2*trim);
-      pose[k+'a']=palmRoll(b[k+'a'],palm,reach(p,.16+lag,.95+lag),sign);
+      const flexionInicial=signed(b[k+'a']+90-angle(f));
+      const flexion=mix(flexionInicial,sign*(5+2*trim),reach(p,.16+lag,.95+lag));
+      pose[k+'a']=angle(fore)-90+flexion;
       pose['handScale'+side+'X']=1-(left?.12:.065)*extend;
       pose['handScale'+side+'Y']=1-(left?.045:.023)*extend;
     }
@@ -3532,7 +3522,6 @@ function createQKnowDive(svg) {
     // signed flexion so the wrist never folds back through the shoulder in a turn.
     const flight=a.flightTransition || b.flightTransition;
     if(flight)out.flightTransition=true;
-    const signed=v=>((v+540)%360)-180;
     for(const k of ['l','r']){
       const shoulder=k+'s', elbow=k+'e', wrist=k+'w';
       const oldUpper=vec(a[shoulder],a[elbow]), newUpper=vec(b[shoulder],b[elbow]);
@@ -3540,14 +3529,18 @@ function createQKnowDive(svg) {
       if(flight){
         const sign=k==='l'?-1:1;
         const upper=blendFlightRay(oldUpper,newUpper,p,sign);
-        // The elbow opens outward while the forearm folds inward to meet the next hold.
-        const fore=blendFlightRay(oldFore,newFore,p,-sign);
+        // Carry the elbow flexion with the shoulder. Two independently
+        // interpolated rays could briefly fold the wrist back to the socket.
+        const bend=mix(signed(angle(oldFore)-angle(oldUpper)),signed(angle(newFore)-angle(newUpper)),p);
+        const fore=polar([0,0],mix(length(oldFore),length(newFore),p),angle(upper)+bend);
         out[elbow]=out[shoulder].map((v,i)=>v+upper[i]);
         out[wrist]=out[elbow].map((v,i)=>v+fore[i]);
         // Blend wrist flexion in the rotating forearm's frame. Keeping
         // the palm in world space would fold it back as the elbow turns.
-        const from=signed(a[k+'a']-angle(oldFore)),to=signed(b[k+'a']-angle(newFore));
-        out[k+'a']=angle(fore)+from+signed(to-from)*p;
+        const from=signed(a[k+'a']+90-angle(oldFore)),to=signed(b[k+'a']+90-angle(newFore));
+        const releasing=(b.flightFace||0)-(a.flightFace||0);
+        const wristPhase=p+.7*releasing*p*(1-p);
+        out[k+'a']=angle(fore)-90+mix(from,to,wristPhase);
         continue;
       }
       const start=angle(oldUpper), end=angle(newUpper);
@@ -3636,12 +3629,8 @@ function createQKnowDive(svg) {
     // The original free-arm energy conduits stay inside the shell when the 
     // wrists leave them. The CPU and central bus continue using the source art.
     atributo(parts.armCircuit,'clip-path','url(#qk17-circuito-central)');
-    // The articulated neck retains its contact point. In the prone pose the
-    // helmet centre advances along the spine and rises above the shoulders;
-    // the face turns about its own volume rather than swinging on a long lever.
-    const tilt=flightNeckAngle*(q.neckLean??0);
-    const cx=400+126*Math.sin(tilt)*flight,cy=207+(140-126*Math.cos(tilt))*flight;
-    tag(parts.head,'translate(0 '+q.headNod+') '+t(neck)+' rotate('+q.headAngle+') translate(-400 -347) translate('+cx+' '+cy+') rotate('+(q.headBank||0)+') scale('+headWidth+' 1) translate(-400 -207)');
+    // Both rotations share the physical socket beneath the helmet.
+    tag(parts.head,'translate(0 '+q.headNod+') '+t(neck)+' rotate('+(q.headAngle+(q.headBank||0))+') scale('+headWidth+' 1) translate(-400 -347)');
     const sideWidth=1-.27*Math.abs(q.headTurn)-.075*flight;
     const shift=(33+17*flight)*q.headTurn;
     const chin=q.visorHeight||0;
@@ -3654,11 +3643,10 @@ function createQKnowDive(svg) {
     if(parts.thrust) tag(parts.thrust,'scale('+(1-.055*(q.thrust-1))+' '+q.thrust+')');
   }
   function projectHead(q){
-    const f=q.flightFace||0, ar=(q.headBank||0)*rad;
-    const dx=(33+17*f)*(q.headTurn||0),dy=25+(q.visorHeight||0);
-    const tilt=flightNeckAngle*(q.neckLean??0);
-    const x=400+126*Math.sin(tilt)*f+dx*Math.cos(ar)-dy*Math.sin(ar);
-    const y=207+(140-126*Math.cos(tilt))*f+(q.headNod||0)+dx*Math.sin(ar)+dy*Math.cos(ar);
+    const f=q.flightFace||0, turn=q.headTurn||0, ar=((q.headAngle||0)+(q.headBank||0))*rad;
+    const dx=(33+17*f)*turn*(1-.09*Math.abs(turn)),dy=232+(q.visorHeight||0)-neck[1];
+    const x=neck[0]+dx*Math.cos(ar)-dy*Math.sin(ar);
+    const y=neck[1]+(q.headNod||0)+dx*Math.sin(ar)+dy*Math.cos(ar);
     return [32+.92*x,32+.92*(y+restY*(q.idleWeight??0))];
   }
   function reset(){
@@ -4703,7 +4691,7 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
     const columnas=leds.map(ojo=>Array.from(ojo.querySelectorAll('ellipse'),el=>({
       el,central:Math.abs(Number(el.getAttribute('cx')))<1
     })));
-    let aplicado=false,ultimaSonrisa=null,ultimoPeso=null;
+    let aplicado=false,ultimaSonrisa=null,ultimoPeso=null,expresion=null;
     function intervalo(indiceMes) {
       const p=Math.max(0,Math.min(9,indiceMes)),i=Math.floor(p);
       return {a:meses[i],b:meses[Math.min(9,i+1)],i,t:p-i};
@@ -4813,10 +4801,10 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
         ojo.removeAttribute('transform');ojo.style.removeProperty('opacity');
         for(const {el} of columnas[i])el.style.removeProperty('translate');
       }
-      ultimaSonrisa=null;ultimoPeso=null;
+      ultimaSonrisa=null;ultimoPeso=null;expresion=null;
       punos.reset();aplicado=false;
     }
-    function detalle(indiceMes,peso=1,pantallaArriba=false,lectura=0,segundos=null) {
+    function detalle(indiceMes,peso=1,pantallaArriba=false,lectura=0,segundos=null,desde=null,fase=1) {
       if(peso<=0){limpiar();return;}
       const {a,b,i,t}=intervalo(indiceMes);
       const ojoT=suave(t,0,.52),manoT=suave(t,.13,.89);
@@ -4825,14 +4813,16 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       const entradaFeb=i===0?(1-suave(t,0,.9))*arco(suave(peso,.08,.95)):0;
       const record=i===6?arco(suave(t,.02,.9)):0;
       const pulso=acentoDeLectura(indiceMes,lectura,0);
-      const x=(leer(0)+13*pulso.record-24*pulso.parcial)*(pantallaArriba?.45:1)+7*record;
-      const y=leer(1)-(pantallaArriba?8.5:0)-9*entradaFeb-7*record-16*pulso.parcial-3*pulso.umbral-5*pulso.record;
-      const sonrisa=leer(3),altura=leer(2);
+      const mirada=suave(fase,0,.75);
+      const seguir=(clave,valor)=>desde?mezclar(desde[clave],valor,mirada):valor;
+      const x=seguir('x',(leer(0)+13*pulso.record-24*pulso.parcial)*(pantallaArriba?.45:1)+7*record);
+      const y=seguir('y',leer(1)-(pantallaArriba?8.5:0)-9*entradaFeb-7*record-16*pulso.parcial-3*pulso.umbral-5*pulso.record);
+      const sonrisa=seguir('sonrisa',leer(3)),altura=seguir('altura',leer(2));
+      const tituloAbr=seguir('tituloAbr',i===2?1-ojoT:i===1?ojoT:0);
       const expresionNueva=sonrisa!==ultimaSonrisa || o!==ultimoPeso;
       // Match the half-lidded celebratory expression at the handoff, keeping
       // the original individual LEDs and their small, symmetric arch.
       for(const [k,ojo] of leds.entries()) {
-        const tituloAbr=i===2?1-ojoT:i===1?ojoT:0;
         const apertura=(altura+(k?-.05:.07)*tituloAbr)*(1-.90*parpadeo(segundos,k*.012));
         const alzada=mezclar(.595,apertura,o);
         const inclinacion=mezclar((k?-1:1)*.5,(k?1:-1)*(-2.2*sonrisa+4*tituloAbr),o);
@@ -4847,7 +4837,7 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       ultimaSonrisa=sonrisa;ultimoPeso=o;
       const pesoMano=suave(peso,.12,1);
       const gesto=acentoDeLectura(indiceMes,lectura,.07);
-      const dedos=[];
+      const dedos=[], recoger=suave(fase,.065,1);
       for(const presenta of [false,true]) {
         for(let j=0;j<5;j++) {
           const base=presenta?mezclar(a.dedos[j],b.dedos[j],manoT):mezclar(relajada[j],abierta[j],gesto.parcial);
@@ -4855,12 +4845,14 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
           // flex at the end of the wrist's motion, from the little finger inward.
           const respuesta=acompanamiento(segundos,presenta,.35+(3-j)*.037);
           const amplitud=(presenta?.10:.13)*(j===0?.37:j===4?.62:1);
-          dedos.push(Math.min(1,Math.max(0,base+amplitud*respuesta))*pesoMano);
+          const flexion=Math.min(1,Math.max(0,base+amplitud*respuesta));
+          dedos.push(desde?mezclar(desde.dedos[dedos.length],flexion,recoger):flexion);
         }
       }
-      punos.set(dedos);aplicado=true;
+      expresion={x,y,sonrisa,altura,tituloAbr,dedos};
+      punos.set(pesoMano===1?dedos:dedos.map(d=>d*pesoMano));aplicado=true;
     }
-    return {muestra,detalle,desplazamiento,limpiar};
+    return {muestra,detalle,desplazamiento,limpiar,get expresion(){return expresion;}};
   }
 
 
@@ -5319,7 +5311,7 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
     let ruta, medir=true, activo=false, imprimiendo=false, lugar='';
     let entradaMensualPorEnlace=location.hash==='#mes-a-mes';
     let visto=null, ultimo=0, marca=scrollY, ultimaPosicion=null, haciaArriba=false, rumbo=0;
-    let relojDeVuelta=false, origenDelAtajo=null;
+    let origenDelAtajo=null, arcoDeViraje=-180;
     function bezierVuelo(c,t) {
       const s=1-t;
       return [0,1].map(i=>s*s*s*c[0][i]+3*s*s*t*c[1][i]+3*s*t*t*c[2][i]+t*t*t*c[3][i]);
@@ -5375,13 +5367,59 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
         return (iz+(siguiente-tiempos[iz])/(tiempos[der]-tiempos[iz]))/n;
       };
     }
-    function moderarGiro(actual,meta,dt,vueltasDeSentidoPorSegundo) {
-      const diferencia=meta-actual;
-      if(Math.abs(diferencia)<.0005)return meta;
-      const paso=Math.min(Math.abs(diferencia)*(-Math.expm1(-dt/170)),vueltasDeSentidoPorSegundo*dt/1000);
-      pedir();
-      return actual+Math.sign(diferencia)*paso;
+    // On reversal, start the new stroke at the pose actually on screen. A
+    // long swipe can otherwise leave a whole previous flight queued up.
+    function crearControlDeVuelo() {
+      let sentido=0, extremo=0, arranque=0, poseInicial=0, anclado=false, velocidadAngular=0;
+      let ultimaLectura=null, quietud=0, frenado=false;
+      return function leer(previo,lectura,rumbo,dt,recorrido,nuevo) {
+        if(lectura*recorrido<.51)lectura=0;
+        if((1-lectura)*recorrido<.51)lectura=1;
+        if(nuevo || lectura!==ultimaLectura){quietud=0;frenado=false;}
+        else quietud+=dt;
+        ultimaLectura=lectura;
+        if(nuevo || previo===null){
+          sentido=previo===null || previo===lectura?Number(haciaArriba):Number(lectura<previo);
+          extremo=lectura;anclado=false;velocidadAngular=0;rumbo=sentido;
+        } else {
+          extremo=sentido?Math.min(extremo,lectura):Math.max(extremo,lectura);
+          const retroceso=Math.abs(lectura-extremo);
+          // One or two pixels of wheel noise shouldn't turn the whole body.
+          const invertir=retroceso*recorrido>Math.min(18,.023*ruta.h) ||
+            (retroceso>0 && (lectura===0 || lectura===1));
+          if(invertir){
+            sentido=1-sentido;arranque=extremo;poseInicial=previo;
+            extremo=lectura;anclado=true;
+          }
+        }
+        let avance=lectura;
+        if(anclado){
+          const meta=1-sentido, tramo=meta-arranque;
+          avance=tramo?mezclar(poseInicial,meta,limitar((lectura-arranque)/tramo)):meta;
+        }
+        if(!nuevo && !frenado && quietud>=80 && lectura>.025 && lectura<.975 &&
+           Math.abs(avance-previo)>.028){
+          // If the reader stops midway through a swipe, coast only a few
+          // pixels. Resume the remaining portion of the same arc on input.
+          avance=previo+Math.sign(avance-previo)*.008;
+          arranque=lectura;poseInicial=avance;anclado=true;frenado=true;
+        }
+        const s=dt/1000, error=sentido-rumbo;
+        if(Math.abs(error)<.0005 && Math.abs(velocidadAngular)<.012){
+          rumbo=sentido;velocidadAngular=0;
+        } else {
+          // A critically damped turn keeps angular velocity continuous when
+          // the reader changes their mind halfway through a bank.
+          const aceleracion=49*error-14*velocidadAngular;
+          velocidadAngular=Math.max(-1.48,Math.min(1.48,velocidadAngular+aceleracion*s));
+          rumbo=limitar(rumbo+velocidadAngular*s);
+          pedir();
+        }
+        return {avance,rumbo,sentido,alineado:1-suave(Math.abs(sentido-rumbo),.09,.70)};
+      };
     }
+    const controlPortada=crearControlDeVuelo(), controlCalendario=crearControlDeVuelo();
+    const controlCrecimiento=crearControlDeVuelo(), controlFirma=crearControlDeVuelo();
     // The curves are in document space. While the page is ahead of the rig,
     // sample the camera at the same progress as the pose. At either station,
     // any scroll past the end of the leg carries the rig with its real host.
@@ -5395,14 +5433,6 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
     }
     function sincronizarVuelos() {
       visto=null;progresoMes=null;avanceCrecimiento=null;tramoFirma=null;
-    }
-    function tiempoPorDistancia(fraccion) {
-      let lo=0,hi=1;
-      for(let i=0;i<16;i++) {
-        const medio=(lo+hi)/2;
-        if(ritmoVuelo(medio)<fraccion) lo=medio; else hi=medio;
-      }
-      return (lo+hi)/2;
     }
     // A narrow screen can show the whole actor on a single vertical line.
     // If the next station is in a different column, connect the two verticals
@@ -5455,7 +5485,10 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       // The desktop Bézier ends at the original, lower keyboard position.
       // Keep the extra reading space at the desk before the calendar flight.
       const finLecturaPuesto=Math.max(fin,Math.min(ancla,fin*1.34,fin+(vertical?.05:.20)*h));
-      const finPortada=vertical?finLecturaPuesto:fin;
+      // The dive must cover visible distance, even on a tall folded phone.
+      // Keep the original reading stop; the laptop scrolls normally after docking.
+      const alturaTactil=Math.min(limiteY,Math.max(.60*h,inicio[1]+.9*a.h));
+      const finPortada=vertical?Math.max(1,Math.min(finLecturaPuesto,destino[1]-alturaTactil)):fin;
       const mesa=[destino[0],destino[1]-finPortada], dy=mesa[1]-inicio[1];
       const margenGiro=8+.49*(w<600?Math.min(174,Math.max(138,.4*w)):Math.min(244,Math.max(178,.19*w)));
       const derecha=Math.min(.754*w,w-margenGiro);
@@ -5482,9 +5515,7 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
         }
       }
       ruta={a,b,w,h,fin,finPortada,inicio,destino,columna:w<=900,hacia:-1,vertical,
-        tramos,pasos,muestras,largo,pendiente:Math.atan2(bajada,-dx)*180/Math.PI,
-        giro:tiempoPorDistancia(muestras[pasos]/largo),
-        salidaGiro:tiempoPorDistancia(muestras[2*pasos]/largo)};
+        tramos,pasos,muestras,largo};
       // Reserve the height of the longest real caption. Longer months never
       // push the presenter away from the keyboard or out of its column.
       const altoApunte=Math.ceil(Math.max(...anclas.map(primero=>{
@@ -5554,13 +5585,11 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
           f.entradaFirma,llegadaFirma,h,a.w);
       }
       const m=ruta.mensual,c=ruta.crece,f=ruta.firma;
-      ruta.compasPortada=medirCompas(0,finPortada,puntoEnCurva,3.1,p=>{
-        const gesto=impulsoDePortada(p);
-        return 46*gesto.lateral+gesto.bajada*gesto.banco;
-      });
-      ruta.compasRegreso=medirCompas(0,finPortada,
-        (p,sy)=>puntoEnCurva(faseRegresoPortada(p),sy),3.1,
-        p=>bancoDeRegreso(p,tangenteDeVuelo(faseRegresoPortada(p))));
+      ruta.compasPortada=medirCompas(0,finPortada,
+        (p,sy)=>puntoEnCurva(faseDePortada(p),sy),2.8,p=>{
+          const banco=90+tangenteDeVuelo(faseDePortada(p));
+          return inclinacionPortada(p,banco,vertical?0:360);
+        });
       m.compas=medirCompas(m.inicio,m.fin,m.punto,3.4,p=>{
         const rumbo=vertical?90:m.rumbo(p);
         const extendido=suave(p,.006,.082), reposo=suave(p,.85,1);
@@ -5613,30 +5642,18 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       const u=puntoEnCurva(a,sa),v=puntoEnCurva(b,sb);
       const dx=v[0]-u[0],dy=(v[1]-sb)-(u[1]-sa);
       if(Math.hypot(dx,dy)<.001) {
-        const [inicio,control]=ruta.tramos[0];
+        const [inicio,control]=p<.5?ruta.tramos[0]:ruta.tramos[2].slice(2);
         return Math.atan2(control[1]-inicio[1],control[0]-inicio[0])*180/Math.PI;
       }
       return Math.atan2(dy,dx)*180/Math.PI;
     }
-    function faseRegresoPortada(p) {
-      // Let go of the keys before departing along the existing pencil arc.
+    function faseDePortada(p) {
+      // Share a contact interval at the keys in both directions.
       const salida=1-p;
       return 1-salida*suave(salida,.042,.155);
     }
-    function bancoDeRegreso(p,tangente) {
-      return (tangente-90)*suave(p,.025,.16)*(1-suave(p,.912,.992));
-    }
-    function impulsoDePortada(p) {
-      const {vertical,giro,salidaGiro,pendiente}=ruta;
-      const preparar=suave(p,0,vertical?.14:Math.min(.16,giro*.48));
-      const picada=vertical?suave(p,.045,.31):suave(p,giro-.065,salidaGiro+.014);
-      const enVuelo=1-suave(p,.61,.922);
-      return {
-        extension:.64*preparar+.36*picada,
-        lateral:vertical?0:preparar*(1-picada)*enVuelo,
-        banco:picada*enVuelo,
-        bajada:vertical?174:-Math.min(120,Math.max(106,90+.84*pendiente))
-      };
+    function inclinacionPortada(p,banco,reposo) {
+      return mezclar(banco*suave(p,.008,.155),reposo,suave(p,.84,.99));
     }
 
 
@@ -5767,11 +5784,13 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
     // The caption, the illuminated bar and the target pose share one month index.
     // Only the pose takes a short time to settle after the reader crosses a date.
     let mesObjetivo=-1, mesDePartida=0, mesEnEscena=0, cambioDesde=0;
+    let duracionCambio=230, poseMostrada=null, poseDePartida=null, expresionDePartida=null;
     let mezclaTransferencia=0, mesPintado=null, pesoPintado=-1, arribaPintado=null;
     let guiaVisible=false, origenRelojGuia=0, ultimoCuadroGuia=-1;
     let lecturaPintada=-1, lecturaDePartida=0, puntoGuia=[0,0];
     function dejarGuia(conservarNoviembre=false) {
       guiaVisible=false; mesObjetivo=-1; mesPintado=null; pesoPintado=-1;
+      poseMostrada=null;poseDePartida=null;expresionDePartida=null;
       historia.classList.remove('qk-leyendo');
       if(!conservarNoviembre)historia.classList.remove('qk-lectura-lista');
       gestos.limpiar();
@@ -5779,15 +5798,21 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
     function pintarGesto(ahora) {
       const vivo=guiaVisible && lugar==='guia-mes' && !imprimiendo;
       if(vivo && !document.hidden)pedir();
-      const fase=limitar((ahora-cambioDesde)/185);
+      const fase=limitar((ahora-cambioDesde)/duracionCambio);
       mesEnEscena=mezclar(mesDePartida,mesObjetivo,fase);
       const peso=mezclaTransferencia, arriba=ruta.guia.arriba;
-      const lectura=mezclar(lecturaDePartida,fraccionDelMes,fase);
+      const metaLectura=mezclar(lecturaDePartida,fraccionDelMes,fase);
+      const dt=Math.min(80,Math.max(0,ahora-ultimoCuadroGuia));
+      const seguirLectura=vivo && ultimoCuadroGuia>=0 && Math.abs(metaLectura-lecturaPintada)>.002;
+      const lectura=seguirLectura?mezclar(lecturaPintada,metaLectura,-Math.expm1(-dt/70)):metaLectura;
       const segundos=vivo?Math.max(0,(ahora-origenRelojGuia)/1000):null;
       const movimiento=vivo && (ahora-ultimoCuadroGuia>=1000/65 || ultimoCuadroGuia<0);
       if(movimiento || mesEnEscena!==mesPintado || peso!==pesoPintado || arriba!==arribaPintado || lectura!==lecturaPintada) {
         situar(puntoGuia[0],puntoGuia[1]+peso*gestos.desplazamiento(segundos),ruta.a.w,0);
-        let pose=gestos.muestra(mesEnEscena,arriba,lectura,segundos), giro=0;
+        const muestraMes=poseDePartida?mesObjetivo:mesEnEscena;
+        let pose=gestos.muestra(muestraMes,arriba,lectura,segundos), giro=0;
+        if(poseDePartida && fase<1)pose=rig.blend(poseDePartida,pose,suave(fase,0,1));
+        poseMostrada=pose;
         if(peso<1) {
           const inicio=gestoDeLlegada();
           pose=rig.blend(inicio.pose,pose,peso);
@@ -5796,7 +5821,8 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
         rig.setJoints(vuelta.proyectar(pose,giro));
         if(Math.abs(giro)>.001)espalda.yaw(giro);
         else espalda.set(0,0);
-        gestos.detalle(mesEnEscena,peso,arriba,lectura,segundos);
+        gestos.detalle(muestraMes,peso,arriba,lectura,segundos,expresionDePartida,fase);
+        if(fase===1){poseDePartida=null;expresionDePartida=null;}
         ultimoCuadroGuia=ahora; lecturaPintada=lectura;
         mesPintado=mesEnEscena; pesoPintado=peso; arribaPintado=arriba;
       }
@@ -5816,12 +5842,18 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
 
       const objetivo=Math.max(0,actual);
       if(objetivo!==mesObjetivo || entrando || !visible) {
-        // A fling or deep link selects its destination directly without playing
-        // the missed months. A reversal starts at the current arm and eye pose.
-        const contiguo=!estatico && visible && !entrando && Math.abs(objetivo-mesEnEscena)<=1.15;
-        mesDePartida=contiguo?mesEnEscena:objetivo;
-        lecturaDePartida=contiguo && lecturaPintada>=0?lecturaPintada:fraccionDelMes;
-        mesObjetivo=objetivo; cambioDesde=ahora;
+        // Preserve the authored beats for adjacent months. If a second swipe
+        // interrupts one, redirect the fingers, joints and eyes from the frame
+        // the reader actually saw, directly toward the newly selected date.
+        const enEscena=!estatico && visible && !entrando && poseMostrada!==null;
+        const interrumpido=ultimoCuadroGuia-cambioDesde<duracionCambio;
+        const atajo=enEscena && (Math.abs(objetivo-mesObjetivo)>1 || interrumpido);
+        poseDePartida=atajo?poseMostrada:null;
+        expresionDePartida=atajo?gestos.expresion:null;
+        mesDePartida=enEscena?mesEnEscena:objetivo;
+        lecturaDePartida=enEscena && lecturaPintada>=0?lecturaPintada:fraccionDelMes;
+        duracionCambio=atajo?310:230;
+        mesObjetivo=objetivo;cambioDesde=ahora;
       }
       mezclaTransferencia=peso;
       const {a,mensual}=ruta;
@@ -5951,11 +5983,10 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       const objetivo=mensual.avance(sy), previo=progresoMes;
       const fuera=sy<mensual.inicio-.42*h || sy>mensual.fin+.42*h;
       const iniciando=lugar!=='despegue-mes' && lugar!=='vuelo-mes';
-      const marcha=previo===null || objetivo===previo?(haciaArriba?1:0):(objetivo<previo?1:0);
-      retornoMes=iniciando?marcha:moderarGiro(retornoMes,marcha,dt,ruta.vertical?1.7:1.3);
-      // Brake as the rig turns; accelerate back along the curve once aligned.
-      const alineado=1-suave(Math.abs(marcha-retornoMes),.06,.58);
-      progresoMes=mensual.compas(previo,objetivo,dt,!visible || fuera,alineado);
+      const mando=controlCalendario(previo,objetivo,retornoMes,dt,mensual.fin-mensual.inicio,iniciando);
+      const {sentido:marcha,alineado}=mando;
+      retornoMes=mando.rumbo;
+      progresoMes=mensual.compas(previo,mando.avance,dt,!visible || fuera,alineado);
       const p=progresoMes;
       if(p===0){desfaseDeSalida=0;salirDeMes();return false;}
       if(p===1){desfaseDeSalida=0;sentarEnMes(sy,ahora,visible);return true;}
@@ -6092,10 +6123,10 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       const siguienteVisible=lugar==='vuelo-crecimiento' && sy<=ruta.firma.salidaFirma+.46*ruta.h;
       const salto=previo===null || !visible || sy<viaje.inicio-.4*ruta.h || (sy>viaje.fin+.42*ruta.h && !siguienteVisible);
       const entrando=lugar!=='vuelo-crecimiento';
-      const volver=objetivo===previo || previo===null?(haciaArriba?1:0):Number(objetivo<previo);
-      regresoCrecimiento=entrando?volver:moderarGiro(regresoCrecimiento,volver,dt,ruta.vertical?1.7:1.3);
-      const alineado=1-suave(Math.abs(regresoCrecimiento-volver),.03,.30);
-      const p=viaje.compas(previo,objetivo,dt,salto,alineado);
+      const mando=controlCrecimiento(previo,objetivo,regresoCrecimiento,dt,viaje.fin-viaje.inicio,entrando);
+      const {sentido:volver,alineado}=mando;
+      regresoCrecimiento=mando.rumbo;
+      const p=viaje.compas(previo,mando.avance,dt,salto,alineado);
       avanceCrecimiento=p;
       if(p===0) {
         regresoCrecimiento=0;segundosOrgullo=0;
@@ -6285,10 +6316,10 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       const continuo=tramoFirma===saliendo && visible && sy>=inicio-.42*ruta.h && sy<=fin+.42*ruta.h;
       const previo=avanceFirma;
       const nuevaSalida=lugar!=='vuelo-firma' || tramoFirma!==saliendo || (saliendo?previo===1:previo===0);
-      const meta=continuo && objetivo!==previo?(objetivo<previo?1:0):(haciaArriba?1:0);
-      orientacionFirma=nuevaSalida?meta:moderarGiro(orientacionFirma,meta,dt,ruta.vertical?1.7:1.3);
-      const alineado=1-suave(Math.abs(meta-orientacionFirma),.06,.58);
-      const p=vueloFinal.compas(previo,objetivo,dt,!continuo,alineado);
+      const mando=controlFirma(previo,objetivo,orientacionFirma,dt,fin-inicio,nuevaSalida || !continuo);
+      const {sentido:meta,alineado}=mando;
+      orientacionFirma=mando.rumbo;
+      const p=vueloFinal.compas(previo,mando.avance,dt,!continuo,alineado);
       tramoFirma=saliendo;avanceFirma=p;
       if(saliendo && p===0){reiniciarFirma();return false;}
       if(!saliendo && p===1){
@@ -6378,7 +6409,7 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
             cambiarLugar('inicio');puesto.quitar();portatil.pauseAnimations();
             if(visible)actor.unpauseAnimations();
           }
-          visto=0;rumbo=0;relojDeVuelta=false;
+          visto=0;rumbo=0;
           if(ruta.vertical)variableDeScroll(hero,'--viaje-portada','0');
           variableDeScroll(hero,'--pista-qk','1');
         }
@@ -6386,14 +6417,11 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
         return;
       }
       const enPortada=objetivo<1 || (visto!==null && visto<1);
-      const invertir=anterior===null || anterior===objetivo?(haciaArriba?1:0):(objetivo<anterior?1:0);
-      if(enPortada)rumbo=moderarGiro(rumbo,invertir,dt,ruta.vertical?1.7:1.3);
-      const deVuelta=enPortada && invertir===1;
-      const compas=deVuelta?ruta.compasRegreso:ruta.compasPortada;
-      if(relojDeVuelta!==deVuelta && anterior!==null)compas(anterior,anterior,dt,true);
-      relojDeVuelta=deVuelta;
-      const alineado=enPortada?1-suave(Math.abs(rumbo-invertir),.06,.58):1;
-      visto=compas(visto,objetivo,dt,sy>ruta.finPortada+.72*h || !visible,alineado);
+      const mando=controlPortada(anterior,objetivo,rumbo,dt,ruta.finPortada,
+        !enPortada || anterior===0 || anterior===1);
+      const invertir=mando.sentido;
+      rumbo=mando.rumbo;
+      visto=ruta.compasPortada(visto,mando.avance,dt,sy>ruta.finPortada+.72*h || !visible,mando.alineado);
       const p=visto;
       if(ruta.vertical)variableDeScroll(hero,'--viaje-portada',p.toFixed(4));
       variableDeScroll(hero,'--pista-qk',String(1-suave(p,.09,.31)));
@@ -6425,30 +6453,38 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
         rumbo=1;
         return;
       }
-      const antes=ruta.vertical?.18:ruta.giro, despues=ruta.vertical?.39:ruta.salidaGiro;
-      const gesto=impulsoDePortada(p);
-      const fase=mezclar(p,faseRegresoPortada(p),rumbo);
+      const fase=faseDePortada(p);
       const tangente=tangenteDeVuelo(fase),rad=Math.PI/180;
-      const proa=tangente-180*rumbo;
-      const mirada=proa+Math.max(-18,Math.min(18,180*(rumbo-invertir)));
+      // Both directed poses are upright at the desk. Interpolate on the
+      // circle so reversing during touchdown cannot unwind a whole turn.
+      const bancoIda=inclinacionPortada(p,tangente+90,ruta.vertical?0:360);
+      const bancoVuelta=inclinacionPortada(p,tangente-90,0);
+      const acotarAngulo=grados=>((grados+180)%360+360)%360-180;
+      const diferencia=acotarAngulo(bancoVuelta-bancoIda);
+      if(rumbo<.001 || rumbo>.999 || anterior===1 || anterior===0){
+        if(Math.abs(diferencia)<179.999)arcoDeViraje=diferencia;
+        else arcoDeViraje=arcoDeViraje>0?180:-180;
+      } else arcoDeViraje+=acotarAngulo(diferencia-arcoDeViraje);
+      const angulo=bancoIda+rumbo*arcoDeViraje;
+      const sentidoGiro=arcoDeViraje>0?1:-1;
+      const proa=tangente+sentidoGiro*180*rumbo;
+      const mirada=proa+sentidoGiro*Math.max(-18,Math.min(18,180*(invertir-rumbo)));
       const direccion={x:Math.cos(proa*rad),y:Math.sin(proa*rad),
         lookX:Math.cos(mirada*rad),lookY:Math.sin(mirada*rad),vertical:ruta.vertical,phase:p,regreso:rumbo};
-      const angulo=mezclar(46*gesto.lateral+gesto.bajada*gesto.banco,bancoDeRegreso(p,tangente),rumbo);
-      const recoger=mezclar(suave(p,.625,.942),suave(p,.914,.994),rumbo);
+      const recoger=suave(p,.85,.987);
       const equipo=mezclar(suave(p,.944,.993),suave(p,.972,.997),rumbo);
       const contacto=mezclar(suave(p,.916,1),suave(p,.966,1),rumbo);
       const cerca=p>=.868;
       cambiarLugar(cerca?'aproximacion':'aire');
       if(!cerca)puesto.quitar();
-      const extension=mezclar(gesto.extension,suave(p,.025,.16),rumbo);
+      const extension=suave(p,.008,.145);
       const vuelo=rig.divePose(extension,angulo,direccion);
       const pose=rig.blend(vuelo,teclado.pose(contacto),recoger);
       rig.setJoints(pose);
-      const vueloDeVuelta=extension*(1-recoger);
-      const aireDeFrente=mezclar(suave(p,antes,despues+.06)*(1-suave(p,.72,.92)),vueloDeVuelta,rumbo);
-      espalda.set(pose.backRoll||0,aireDeFrente,pose.flightSide??1);
+      const enVuelo=extension*(1-recoger);
+      espalda.set(pose.backRoll||0,enVuelo,pose.flightSide??1);
       teclado.detail(contacto);
-      punos.set(mezclar(suave(p,.023,.17)*(1-suave(p,.708,.87)),suave(p,.035,.17)*(1-suave(p,.924,.978)),rumbo));
+      punos.set(suave(p,.023,.17)*(1-suave(p,.882,.968)));
       const [x,y]=puntoEnCurva(fase,sy);
       if(cerca) {
         const mesaX=26+(x-b.x)/unidadPuesto, mesaY=-12+(y-b.y)/unidadPuesto;
@@ -6458,9 +6494,7 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       } else {
         situar(x,y-sy,a.w,angulo);
         const empuje=anterior===null?0:limitar(Math.abs(p-anterior)*fin/(dt*1.25));
-        const ida=ruta.vertical?suave(p,.10,.35)*(1-suave(p,.72,.87)):
-          suave(p,ruta.giro-.015,ruta.salidaGiro+.045)*(1-suave(p,.735,.856));
-        pintarEstela(x,y-sy,a.w,proa,mezclar(ida,vueloDeVuelta,rumbo)*suave(Math.abs(1-2*rumbo),.19,.85),empuje);
+        pintarEstela(x,y-sy,a.w,proa,enVuelo*suave(Math.abs(1-2*rumbo),.19,.85),empuje);
       }
     }
     function invalidar() {medir=true; pedir();}
