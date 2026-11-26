@@ -792,9 +792,6 @@ body{overflow-x:clip}
  .hero{padding-top:20px;row-gap:4px}.marca-quality{width:110px}.hero-contenido{padding-top:12px}
  #mes-a-mes .hist-grafica{top:10px}
  .laptop-display{gap:1.2cqw;padding:2cqw 2.2cqw 1.5cqw}
- .display-toolbar{font-size:7px}.display-month{font-size:12px}.display-total strong{font-size:24px}
- .display-total>span,.display-average>span{font-size:8px}.display-average>strong{font-size:17px}
- .display-footer{font-size:7px}.laptop .hist-eje,.laptop .hist-ref-et{font-size:8px}.laptop .hist-valor{font-size:8px}
  .historia .paso-mes{font-size:11px}.historia .paso-txt{font-size:22px;max-width:27ch}
 }
 @media(prefers-reduced-motion:reduce){.laptop-tapa{transform:none!important;will-change:auto}.laptop-display{opacity:1!important}.display-summary.cambio{animation:none}}
@@ -817,7 +814,6 @@ html:not(.anim) .laptop-tapa{transform:none;will-change:auto}html:not(.anim) .la
  .historia .paso{min-height:90vh;justify-content:center;padding-top:24px}
  .historia .paso-txt{font-size:18px;line-height:1.45}.historia .paso-mes{font-size:10px}.historia .paso-dias{font-size:10px}
 }
-@media(max-width:600px){.laptop .hist-valor{display:none}}
 
 
 /* Source brand lockups, kept below the reporting period. */
@@ -938,6 +934,13 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
   justify-self: start;
   margin: 0;
 }
+@media screen and (max-width:900px) {
+  /* The chest sits at 32.1% of the working illustration, to the left of the lid. */
+  .viaje-qknow-activo #comienzo figure.qknow-comienzo {
+    justify-self:center;position:relative;
+    left:min(calc(var(--qknow-size) * .1843),max(0px,calc((100% - var(--qknow-size)) / 2)));
+  }
+}
 
 .qk-puesto-activo.qk-en-puesto [data-work-actor]{display:inline}
 .viaje-qknow-activo .hero-bajar:not(:focus-visible){opacity:var(--pista-qk,1)}
@@ -970,7 +973,6 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
 }
 .qk-transito-mensual #numeros, .qk-transito-mensual #comienzo .calendario,
 .qk-transito-mensual #comienzo .comienzo-texto > :is(.intro,.nota) {position:relative; z-index:2}
-.qk-transito-mensual #comienzo .comienzo-texto > :is(.intro,.nota) {background:var(--bg-surface)}
 
 .qk-mes-escena{display:block;width:100%;height:100%;overflow:visible}
 
@@ -1005,42 +1007,98 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
   .qk-guia-texto .paso-dias[hidden] {display:none}
   .qk-capitulo-mensual .hist-pasos {opacity:0;pointer-events:none}
 }
-@media screen and (max-width:900px) and (min-height:601px),
-       screen and (max-width:600px) {
-  .qk-capitulo-mensual .historia {
-    --qk-alto-apunte:164px;
-    --qk-alto-laptop:min(calc((100vw - 2 * var(--lado)) * .666667),calc(52svh - 16px),
-      max(125px,calc(100svh - var(--qk-alto-apunte) - .82 * var(--qknow-size) - 38px)));
-    --qk-tope-guia:calc(18px + var(--qk-alto-laptop));
-    --qk-inicio-carga:var(--qk-tope-guia);
+/* The monthly display uses the same silver artwork at a more upright opening
+   on small screens. Its usable height comes from the report column itself. */
+.historia {--qk-apilado:0}
+@media screen and (max-width:900px), screen and (max-width:1100px) and (pointer:coarse) {
+  #mes-a-mes>.marco {container:capitulo-mensual / inline-size}
+  #mes-a-mes .intro {margin-bottom:clamp(20px,4svh,36px)}
+  .qk-capitulo-mensual #mes-a-mes>.marco>.intro {max-width:min(100%,48rem)}
+  .qk-capitulo-mensual #mes-a-mes .historia {display:grid}
+  #mes-a-mes .historia {
+    --qk-apilado:1;
+    --alto-equipo:clamp(186px,min(83cqi,52svh),470px);
+    --aire-guia:clamp(8px,2cqi,18px);
+    --ancho-guia:max(40%,calc(100cqi - var(--qknow-size) - var(--aire-guia)));
+    --alto-guia:max(var(--qknow-size),var(--qk-alto-apunte));
+    --tope-equipo:clamp(60px,calc((100svh - var(--alto-equipo) - var(--alto-guia) - var(--aire-guia)) * .5),22svh);
+    --qk-tope-guia:calc(var(--tope-equipo) + var(--alto-equipo) + var(--aire-guia));
     --qk-tope-carga:var(--qk-tope-guia);
-    display:grid;grid-template-columns:minmax(0,1fr);gap:0;
+    --qk-inicio-carga:calc(var(--alto-equipo) + var(--aire-guia));
+    grid-template-columns:minmax(0,1fr);gap:0;
   }
-  .qk-capitulo-mensual #mes-a-mes .hist-grafica {
-    grid-column:1;grid-row:1;align-self:start;top:8px;margin-bottom:0;
+  #mes-a-mes .hist-grafica {
+    grid-area:1/1;align-self:start;top:var(--tope-equipo);transform:none;
+    width:100%;max-width:none;margin:0;background:transparent;
+    overflow:clip;overflow-clip-margin:3px;
   }
-  .qk-capitulo-mensual .historia .laptop {max-width:calc(var(--qk-alto-laptop) * 1.5)}
-  .qk-capitulo-mensual .hist-pasos {
-    grid-column:1;grid-row:1;padding-top:calc(var(--qk-alto-laptop) + 12vh);
+  #mes-a-mes .laptop {
+    --alto-base:clamp(22px,6cqi,42px);
+    height:var(--alto-equipo);width:min(100%,calc(var(--alto-equipo) * 1.94));max-width:none;
+    aspect-ratio:auto;perspective-origin:50% calc(100% - var(--alto-base));
   }
-  .qk-capitulo-mensual .qk-guia-mensual {margin-top:var(--qk-tope-guia)}
-  .qk-capitulo-mensual .qk-guia-escena {
-    margin-block:calc(-.035 * var(--qknow-size)) calc(-.11 * var(--qknow-size));
+  #mes-a-mes .laptop-tapa {inset:0 3% var(--alto-base)}
+  #mes-a-mes .laptop-tapa-arte {background-size:133.33% 141.4%;background-position:center 13.6%}
+  #mes-a-mes .laptop-base {
+    inset:calc(100% - var(--alto-base)) -12.5% auto;height:calc(var(--alto-base) * 1.59);
+    transform-origin:50% 0;transform:perspective(calc(var(--alto-base) * 7.15)) rotateX(-44deg);
+    background-size:100% 459%;background-position:center 95.55%;
+  }
+  #mes-a-mes .laptop-display {
+    inset:4.8% 1.72% 5.75%;height:auto;
+    padding:clamp(8px,2.8cqw,19px) clamp(8px,2.9cqw,20px) clamp(6px,2cqw,13px);
+    gap:clamp(4px,1.7cqw,11px);
+  }
+  #mes-a-mes .display-toolbar {font-size:clamp(9px,1.85cqw,12px)}
+  #mes-a-mes .display-month {font-size:clamp(15px,3.9cqw,24px);margin-bottom:1px}
+  #mes-a-mes .display-total strong {font-size:clamp(27px,7.2cqw,43px)}
+  #mes-a-mes .display-average>strong {font-size:clamp(19px,4.7cqw,28px)}
+  #mes-a-mes :is(.display-total>span,.display-average>span,.display-footer) {
+    font-size:clamp(10px,2.05cqw,13px);line-height:1.22;color:#4f607d;
+  }
+  #mes-a-mes :is(.hist-eje,.hist-ref-et) {font-size:clamp(10px,1.95cqw,13px)}
+  #mes-a-mes .hist-valor {display:block;font-size:clamp(11px,2.3cqw,15px)}
+  #mes-a-mes .qk-bateria-display {font-size:clamp(14px,3.3cqw,22px)}
+  #mes-a-mes .qk-bateria-estado {font-size:clamp(11px,2.55cqw,15px)}
+  #mes-a-mes .qk-bateria-display svg {width:clamp(32px,7.5cqw,54px)}
+  .qk-capitulo-mensual #mes-a-mes :is(.qk-ancla-carga,.qk-mes-reposo) {justify-self:end}
+  .qk-capitulo-mensual #mes-a-mes .qk-guia-mensual {
+    grid-area:1/1;align-items:center;grid-template-columns:minmax(0,1fr) var(--qknow-size);
+    min-height:var(--alto-guia);column-gap:var(--aire-guia);margin-top:var(--qk-inicio-carga);top:var(--qk-tope-guia);
+  }
+  .qk-capitulo-mensual #mes-a-mes .qk-guia-escena {align-self:center;margin:0}
+  .qk-capitulo-mensual #mes-a-mes .qk-guia-texto {min-height:0;padding:0;gap:6px}
+  #mes-a-mes .historia .paso-txt {
+    max-width:36ch;font-size:clamp(16px,4.6cqi,24px);line-height:1.3;text-wrap:pretty;
+  }
+  #mes-a-mes .historia .paso-mes {font-size:clamp(10px,1.9cqi,12px);line-height:1.3}
+  #mes-a-mes .historia .paso-dias {font-size:clamp(10px,1.9cqi,12px);line-height:1.45}
+  .qk-capitulo-mensual #mes-a-mes .hist-pasos {
+    grid-area:1/1;padding:var(--qk-inicio-carga) 0 28svh;
+  }
+  .qk-capitulo-mensual #mes-a-mes .hist-pasos::before {height:clamp(260px,68svh,520px)}
+  .qk-capitulo-mensual #mes-a-mes .paso {
+    width:var(--ancho-guia);min-height:clamp(270px,55svh,495px);
+    padding:0;gap:6px;justify-content:center;
   }
 }
-@media screen and (max-width:600px) and (max-height:740px) {
-  .qk-capitulo-mensual .historia .paso-txt {font-size:clamp(16px,4.8vw,20px);line-height:1.32}
-  .qk-capitulo-mensual .qk-guia-texto,.qk-capitulo-mensual .historia .paso {gap:8px}
-}
-@media screen and (min-width:601px) and (max-height:600px) {
-  .qk-capitulo-mensual .historia {--qk-alto-apunte:175px;--qk-tope-guia:6px}
-  .qk-capitulo-mensual .historia .paso-txt {font-size:clamp(15px,1.9vw,19px);line-height:1.28}
-  .qk-capitulo-mensual .qk-guia-texto,.qk-capitulo-mensual .historia .paso {gap:6px}
-  .qk-capitulo-mensual .qk-guia-escena {
-    margin-block:calc(-.055 * var(--qknow-size)) calc(-.14 * var(--qknow-size));
+@media screen and (max-width:900px) and (min-aspect-ratio:5/4),
+       screen and (max-width:1100px) and (pointer:coarse) and (min-aspect-ratio:5/4) {
+  @container capitulo-mensual (min-width:410px) {
+    #mes-a-mes .historia {
+      --qk-apilado:0;--alto-equipo:clamp(160px,min(78svh,calc(100svh - 66px)),390px);--ancho-guia:100%;
+      --tope-equipo:max(50svh,calc(60px + var(--alto-equipo) / 2));--qk-inicio-carga:0px;
+      --qk-tope-guia:max(6px,calc((100svh - var(--qk-alto-apunte) - var(--qknow-size)) / 2));
+      --qk-tope-carga:max(6px,calc((100svh - var(--qknow-size)) / 2));
+      display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2.15fr);gap:clamp(12px,2cqi,22px);
+    }
+    #mes-a-mes .hist-grafica {grid-area:1/2;transform:translateY(-50%)}
+    .qk-capitulo-mensual #mes-a-mes :is(.qk-ancla-carga,.qk-mes-reposo) {justify-self:center}
+    .qk-capitulo-mensual #mes-a-mes .qk-guia-mensual {grid-template-columns:1fr;gap:4px}
+    .qk-capitulo-mensual #mes-a-mes .hist-pasos {padding:24svh 0}
+    #mes-a-mes .historia .paso-txt {font-size:clamp(15px,2.3cqi,19px)}
   }
 }
-
 
 /* The same rig that closed November docks in the original growth figure.
    Its intrinsic square is reserved before, during and after the flight. */
@@ -1063,8 +1121,6 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
   .qk-vuelo-cierre :is(#lo-mas-visto,#protagonistas,#como-llegan),
   .qk-vuelo-cierre #cierre :is(.cierre-texto,.sobre),
   .qk-vuelo-cierre .crecimiento-datos>:is(.ceja,.titular,.lead,.compara) {position:relative;z-index:2}
-  .qk-vuelo-cierre #cierre :is(.cierre-texto,.sobre),
-  .qk-vuelo-cierre .crecimiento-datos>:is(.ceja,.titular,.lead,.compara) {background-color:var(--bg-app)}
   html.anim.viaje-qknow-activo #crecimiento figure.qknow-impulso.revela {
     position:relative;aspect-ratio:1;max-width:100%;
     opacity:1;transform:none;clip-path:none;transition:none;
@@ -1079,10 +1135,10 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
   .qk-vuelo-crecimiento #mes-a-mes .qk-guia-mensual {z-index:2}
   .qk-vuelo-crecimiento #mes-a-mes .hist-grafica {z-index:3}
   .qk-vuelo-crecimiento .historia.qk-lectura-lista .qk-guia-texto {
-    background:var(--bg-surface);transition:none;
+    transition:none;
   }
   .qk-vuelo-crecimiento .crecimiento-datos>:is(.ceja,.titular,.lead,.compara) {
-    position:relative;z-index:2;background-color:var(--bg-app);
+    position:relative;z-index:2;
   }
 }
 @media screen and (max-width:900px) and (prefers-reduced-motion:no-preference) {
@@ -1229,6 +1285,47 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
 }
 @media(prefers-reduced-motion:reduce) { .chapter-dock .dock-link,.idioma-pista,.idioma-pista::after {transition:none;} }
 @media print { .cabecera-capitulos {display:none;} }
+
+/* On touch layouts the same physical rig fits in the available reading space
+   at the keyboard, in flight and beside each month's data. */
+@media screen and (max-width:900px), screen and (hover:none) and (pointer:coarse) {
+  :root,.tema-oscuro {
+    --qknow-size:clamp(96px,min(36vw,27svh),222px);
+    --lado:clamp(12px,4.25vw,40px);
+    --seccion-y:clamp(28px,min(9vw,8svh),72px);
+  }
+  .marco {width:calc(100% - 2 * var(--lado));margin-inline:auto}
+  .anim.viaje-qknow-activo .hero-contenido {opacity:min(var(--pista-qk,1),calc(1 - var(--salida,0)*1.15))}
+  .cierre.seccion {min-height:auto;padding-block:var(--seccion-y)}
+  #lo-mas-visto {overflow-x:clip}
+  #numeros>.marco {container:resumen / inline-size}
+  .cifras {row-gap:clamp(18px,4vw,32px)}
+  .cifras-nota {margin-top:clamp(24px,5vw,46px)}
+  .destacadas {grid-template-columns:repeat(auto-fit,minmax(min(100%,17rem),1fr))}
+  .fuentes {display:flex;flex-wrap:wrap;gap:clamp(12px,2.4vw,24px)}
+  .fuente {flex:1 1 13rem;min-width:0;padding:clamp(16px,3vw,28px)}
+  .galeria {gap:clamp(12px,2.4vw,24px)}
+  .tarjeta {flex-basis:min(84%,23rem)}
+  @container resumen (min-width:35rem) {
+    .cifras {grid-template-columns:repeat(3,minmax(0,1fr));gap:3%}
+  }
+  @container resumen (max-width:34.99rem) {
+    .cifra {grid-template: "valor nombre" auto "valor detalle" auto / minmax(0,.92fr) minmax(0,1.1fr);
+      justify-items:start;text-align:left;column-gap:5%;row-gap:1px;align-content:center}
+    .cifra::before {display:none}
+    .cifra-num {grid-area:valor;align-self:center;justify-self:end;font-size:clamp(30px,9.8cqi,48px)}
+    .cifra-et {grid-area:nombre;font-size:clamp(15px,4.5cqi,20px)}
+    .cifra-sub {grid-area:detalle}
+  }
+}
+/* On wide desktops the existing opaque foreground surfaces mask the flight.
+   Touch layouts fade the flying rig at the text itself. */
+@media screen and (min-width:901px) and (hover:hover) {
+  .qk-transito-mensual #comienzo .comienzo-texto > :is(.intro,.nota),
+  .qk-vuelo-crecimiento .historia.qk-lectura-lista .qk-guia-texto {background:var(--bg-surface)}
+  .qk-vuelo-cierre #cierre :is(.cierre-texto,.sobre),
+  :is(.qk-vuelo-cierre,.qk-vuelo-crecimiento) .crecimiento-datos>:is(.ceja,.titular,.lead,.compara) {background:var(--bg-app)}
+}
 
 </style>
 <noscript><style>
@@ -2559,6 +2656,13 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
     const final=meses[meses.length-1];
     return animar && ajusteLectura && linea<final ? final+(linea-final)/(1-ajusteLectura) : linea;
   }
+  function scrollParaElMismoMes(medidas,vh) {
+    const meses=medidas.meses, i=mesSolicitado, final=meses[meses.length-1];
+    const tramo=i+1<meses.length?meses[i+1]-meses[i]:final-meses[i-1];
+    const lectura=meses[i]+Math.max(1,tramo*fraccionDelMes);
+    const linea=animar && lectura<final?final+(lectura-final)*(1-ajusteLectura):lectura;
+    return linea-vh*(medidas.apilado?.68:.50);
+  }
   var actual = null, grupos = [], ejes = [], zonas = [], etiqueta = null, geo = null;
   var historia = document.querySelector('.historia'), laptop = document.querySelector('.laptop');
   var displayMes = document.getElementById('display-month'), displayVisitas = document.getElementById('display-visits');
@@ -2647,7 +2751,8 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
     lienzo.classList.add('sin-transicion');
     lienzo.textContent = '';
     var svg = nodo('svg', { width: w, height: h, viewBox: '0 0 ' + w + ' ' + h, 'aria-hidden': 'true', focusable: 'false' }, lienzo);
-    var m = { t: w < 380 ? 14 : 24, r: 6, b: w < 380 ? 18 : 24, l: 6 };
+    var compactoGrafica = w < 520;
+    var m = { t: Math.min(compactoGrafica ? 19 : 24, h * .22), r: 4, b: Math.min(compactoGrafica ? 19 : 24, h * .27), l: 4 };
     var tope = 1100, n = MESES.length, slot = (w - m.l - m.r) / n;
     var ancho = Math.min(tok('--size-chip'), slot * 0.56), base = h - m.b;
     function y(v) { return m.t + (base - m.t) * (1 - v / tope); }
@@ -2671,7 +2776,7 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
       nodo('path', { d: dTrazo, 'class': 'hb-barra' }, g);
       if (d.parcial) nodo('path', { d: dTrazo, 'class': 'hb-rayas' }, g);
       grupos.push(g);
-      var ejeMes = nodo('text', { x: cx(k), y: base + tok('--space-5'), 'text-anchor': 'middle', 'class': 'hist-eje' }, svg);
+      var ejeMes = nodo('text', { x: cx(k), y: base + (compactoGrafica ? 14 : tok('--space-5')), 'text-anchor': 'middle', 'class': 'hist-eje' }, svg);
       ejeMes.textContent = t(d.c);
       ejes.push(ejeMes);
     });
@@ -2829,11 +2934,14 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
     window.addEventListener('afterprint',invalidar);
     if(document.fonts)document.fonts.ready.then(invalidar);
   }
+  function guiaDebajoDePantalla() {
+    return getComputedStyle(historia).getPropertyValue('--qk-apilado').trim()==='1';
+  }
   function medirLectura(sy) {
     const top=el=>el?el.getBoundingClientRect().top+sy:Infinity;
     const seccionCrecimiento=mega&&mega.closest('section');
     return {
-      meses:anclas.map(top),capitulos:capitulos.map(top),portada:top(portadaMensual),hero:hero?hero.offsetHeight:0,
+      apilado:guiaDebajoDePantalla(),meses:anclas.map(top),capitulos:capitulos.map(top),portada:top(portadaMensual),hero:hero?hero.offsetHeight:0,
       crecimiento:top(seccionCrecimiento),finCrecimiento:seccionCrecimiento?top(seccionCrecimiento)+seccionCrecimiento.offsetHeight:Infinity
     };
   }
@@ -2857,10 +2965,23 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
     if(el.style.getPropertyValue(nombre)!==valor)el.style.setProperty(nombre,valor);
   }
   var pendiente = false;
+  let anchoDeLectura=innerWidth, altoDeLectura=innerHeight, enMesMedido=false;
   function pedir() { if (!pendiente) { pendiente = true; requestAnimationFrame(cuadro); } }
   function cuadro(ahora=performance.now()) {
     pendiente=false;
-    const vh=innerHeight, sy=window.pageYOffset;
+    const vh=innerHeight, ancho=innerWidth;
+    let sy=window.pageYOffset;
+    // A fold or rotation changes both the spacing of the month anchors and
+    // the reading line. Preserve the reader's place once, on that reflow.
+    // Ordinary touch scroll and the mobile browser bar keep native scrolling.
+    if(ancho!==anchoDeLectura || Math.abs(vh-altoDeLectura)>altoDeLectura*.30) {
+      geometriaLectura=medirLectura(sy);revisarLectura=true;
+      if(enMesMedido && datosPublicados && mesSolicitado>=0) {
+        window.scrollTo({top:scrollParaElMismoMes(geometriaLectura,vh),behavior:'instant'});
+        sy=window.pageYOffset;
+      }
+    }
+    anchoDeLectura=ancho;altoDeLectura=vh;
     // Read scrolling layout before changing a style or posing the SVG.
     const cambioDeLectura=revisarLectura || ultimoScroll!==sy || ultimaAnimacion!==animar || !geometriaLectura;
     if(cambioDeLectura){
@@ -2878,7 +2999,7 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
       if(colocarDock)colocarDock(sy,vh);
       pintarTapaMensual(sy,vh,medidas.portada);
       if(pasos.length){
-        const dosColumnas=!compacto.matches||(innerWidth>600&&vh<=600);
+        const dosColumnas=!medidas.apilado;
         const posiciones=medidas.meses;
         const linea=lineaDeLosMeses(sy+vh*(dosColumnas?.5:.68),posiciones);
         let i=-1;
@@ -2889,7 +3010,9 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
           fraccionDelMes=limitar((linea-posiciones[i])/Math.max(1,tramo));
         }
         if(i<0 && (!viajeQKnow||!animar) && medidas.portada-sy<vh*.9)i=0;
-        mesSolicitado=i;actualizarDatosMensuales();
+        mesSolicitado=i;
+        enMesMedido=i>=0 && linea>=posiciones[0] && (i<posiciones.length-1 || fraccionDelMes<1);
+        actualizarDatosMensuales();
       }
       let cur=-1;
       medidas.capitulos.forEach((y,k)=>{if(y<sy+vh*.4)cur=k;});
@@ -3109,7 +3232,8 @@ function createQKnowDive(svg) {
     const heading=direction || {x:Math.sin(worldRoll*rad),y:-Math.cos(worldRoll*rad)};
     const divisor=Math.max(.001,Math.hypot(heading.x,heading.y));
     const hx=heading.x/divisor, hy=heading.y/divisor;
-    const bankSide=clamped(-hx*1.72);
+    const vertical=heading.vertical===true;
+    const bankSide=vertical?.27:clamped(-hx*1.72);
     const yaw=116*turn*bankSide*rad, pitch=11*turn*rad;
     const cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);
     // Roll the shoulder girdle and the two rigid links in three dimensions.
@@ -3123,13 +3247,14 @@ function createQKnowDive(svg) {
         interp3(unit3(via),orient(end),reach(p,split,finish));
     }
     pose.backRoll=turn; pose.flightSide=bankSide;pose.bodyTurn=-turn*bankSide;
-    pose.headTurn=clamped(hx*1.33)*.98*turn; pose.idleWeight=1-turn;
-    pose.flightFace=turn;pose.headNod=0;pose.headForeshorten=1;
+    pose.headTurn=(vertical?-.30:clamped(hx*1.33)*.98)*turn; pose.idleWeight=1-turn;
+    pose.flightFace=turn;pose.headNod=vertical?36*turn:0;pose.headForeshorten=1;
     // Heading is the on-screen tangent, including when the reader reverses.
     // Looking into a climb raises the face window and counter-pitches the chin.
     pose.visorHeight=(-12+19*hy)*turn;
     pose.headAim=(Math.atan2(hy,Math.max(.32,Math.abs(hx)))/rad*.23-10)*clamped(1.65*hx)*turn;
-    pose.headBank=(-worldRoll+pose.headAim)*turn;
+    pose.headBank=(vertical?-worldRoll*.055:-worldRoll+pose.headAim)*turn;
+    if(vertical)pose.visorHeight=-12*turn;
     pose.thrust=1+.34*stretch;
     for(const side of sides){
       const k=side.toLowerCase(),left=side==='L';
@@ -3140,9 +3265,9 @@ function createQKnowDive(svg) {
       const startF=lift3(f[0],f[1],lf,left?1:-1);
       // Both palms point along the spine with a small stagger in depth.
       const far=(1+(left?bankSide:-bankSide))/2;
-      const endU=unit3([mix(-.23,.32,far)*bankSide,-1,mix(.13,.28,far)]);
-      const endF=unit3([mix(-.04,.20,far)*bankSide,-1,mix(.18,.25,far)]);
-      const axis=project([(s0[0]-400)*(1-.045*stretch),s0[1]-410-32*stretch,16*stretch]);
+      const endU=unit3([vertical?(left?-.32:.28):mix(-.23,.32,far)*bankSide,-1,vertical?.08:mix(.13,.28,far)]);
+      const endF=unit3([vertical?(left?-.12:.11):mix(-.04,.20,far)*bankSide,-1,vertical?.06:mix(.18,.25,far)]);
+      const axis=project([(s0[0]-400)*(1-.045*stretch),s0[1]-410-(vertical?46:32)*stretch,16*stretch]);
       const shoulder=[400+axis[0],410+axis[1]];
       const upper=left?project(interp3(startU,endU,reach(p,.04,.83))):
         gatherThenReach(startU,[-.29,.70,.655],endU,.37,.92);
@@ -4876,6 +5001,7 @@ function medirRutaMensual({puesto,calendario,reposo,numeros,anchoActor,viewport,
     const montaje=aire.querySelector('.qk-montaje');
     const estela=aire.querySelector('.qk-estela');
     const espacio=montaje.parentNode;
+    const vueloTactil=matchMedia('(max-width:900px), (hover:none) and (pointer:coarse)');
     const capitulo=document.getElementById('mes-a-mes'), numeros=document.getElementById('numeros');
     const reposoMensual=capitulo.querySelector('.qk-mes-reposo');
     const escenaMensual=reposoMensual.querySelector('svg');
@@ -4903,6 +5029,9 @@ function medirRutaMensual({puesto,calendario,reposo,numeros,anchoActor,viewport,
     const cierre=document.getElementById('cierre');
     const anclaFirma=cierre.querySelector('.qk-firma-ancla');
     const escenaFirma=anclaFirma.querySelector('svg');
+    const tintaMovil=matchMedia('(max-width:900px), (hover:none) and (pointer:coarse)');
+    const textoEnElRecorrido=todos('#comienzo .comienzo-texto > :is(.intro,.nota), .crecimiento-datos > :is(.ceja,.titular,.lead,.compara), #cierre :is(.cierre-texto,.sobre)');
+    let zonasDeLectura=[], visibilidadEnVuelo='';
     raiz.classList.add('qk-capitulo-mensual');
     const rig=createQKnowDive(actor), espalda=createQKnowBack(actor), teclado=createQKnowKeyboardPose(actor,portatil);
     const punos=createQKnowFists(actor), puesto=crearPuestoQKnow(portatil,teclado.slot);
@@ -4941,10 +5070,34 @@ function medirRutaMensual({puesto,calendario,reposo,numeros,anchoActor,viewport,
       }
       return (lo+hi)/2;
     }
+    // A narrow screen can show the whole actor on a single vertical line.
+    // If the next station is in a different column, connect the two verticals
+    // outside the viewport, after the hands, body and slipstream have cleared it.
+    function corredorVertical(desde,hasta,inicio,fin,h,tamano) {
+      const y0=desde[1]-inicio, y1=hasta[1]-fin;
+      const borde=1.4*tamano+18;
+      const cambiarColumna=Math.abs(hasta[0]-desde[0])>Math.max(12,.13*tamano);
+      const porBordes=cambiarColumna || y1<y0+.075*h;
+      return p=>{
+        const s=limitar(p), scrollPrevisto=mezclar(inicio,fin,s);
+        const libre=suave(s,0,.09)*(1-suave(s,.92,1));
+        const pagina=scrollPrevisto+(scrollY-scrollPrevisto)*libre;
+        if(!porBordes){
+          const t=ritmoVuelo(s);
+          return [mezclar(desde[0],hasta[0],t),pagina+mezclar(y0,y1,t)];
+        }
+        if(s<.5)return [desde[0],pagina+mezclar(y0,h+borde,suave(s,0,.49))];
+        return [hasta[0],pagina+mezclar(-borde,y1,suave(s,.51,1))];
+      };
+    }
     function actualizarMedidas() {
       const a=cajaDeRecorrido(origen), b=cajaDeRecorrido(estacion);
       const seccion=document.getElementById('comienzo');
       const w=document.documentElement.clientWidth, h=innerHeight;
+      const vertical=vueloTactil.matches;
+      if(ruta && (ruta.vertical!==vertical || (vertical && Math.abs(w-ruta.w)>2))) {
+        visto=null;progresoMes=null;avanceCrecimiento=null;
+      }
       // The path follows the sternum, even during the bank of the head and arms.
       const ax=.50566, ay=.471;
       const inicio=[a.x+a.w*ax,a.y+a.h*ay];
@@ -4984,7 +5137,7 @@ function medirRutaMensual({puesto,calendario,reposo,numeros,anchoActor,viewport,
           previo=pt;
         }
       }
-      ruta={a,b,w,h,fin,inicio,destino,columna:w<=900,hacia:-1,
+      ruta={a,b,w,h,fin,inicio,destino,columna:w<=900,hacia:-1,vertical,
         tramos,pasos,muestras,largo,pendiente:Math.atan2(bajada,-dx)*180/Math.PI,
         giro:tiempoPorDistancia(muestras[pasos]/largo),
         salidaGiro:tiempoPorDistancia(muestras[2*pasos]/largo)};
@@ -5004,7 +5157,12 @@ function medirRutaMensual({puesto,calendario,reposo,numeros,anchoActor,viewport,
         numeros:cajaNumeros,
         anchoActor:a.w,viewport:{w,h},finAnterior:fin,
         portada:cajaDeRecorrido(capitulo).y-(parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop)||0)-1});
-      const arriba=compacto.matches && !(w>600 && h<=600);
+      if(vertical){
+        ruta.saludoVertical=corredorVertical(inicio,destino,0,fin,h,a.w);
+        const m=ruta.mensual;
+        m.punto=corredorVertical(destino,m.llegada,m.inicio,m.fin,h,a.w);
+      }
+      const arriba=guiaDebajoDePantalla();
       const primeraLectura=cajaDeRecorrido(anclas[0]).y-h*(arriba?.68:.50);
       const inicioHistoria=cajaDeRecorrido(historia).y;
       const inicioGuia=Math.max(ruta.mensual.fin+.08*h,inicioHistoria-.30*h);
@@ -5019,6 +5177,10 @@ function medirRutaMensual({puesto,calendario,reposo,numeros,anchoActor,viewport,
       ruta.crece=medirVueloCrecimiento({noviembre,octubre,finHistoria:ruta.guia.final,guia:guiaMensual,
         escenaGuia,destino:ruta.destinoCrecimiento,seccion:cajaDeRecorrido(crecimiento),
         laptop,anchoActor:a.w,viewport:{w,h},apilado:arriba});
+      if(vertical){
+        const c=ruta.crece;
+        c.punto=corredorVertical(c.origen,c.llegada,c.inicio,c.fin,h,a.w);
+      }
       const porcentaje=cajaDeRecorrido(crecimiento.querySelector('.mega'));
       ruta.miradaAlDato={x:porcentaje.x+.5*porcentaje.w-ruta.crece.llegada[0],
         y:porcentaje.y+.5*porcentaje.h-ruta.crece.llegada[1]};
@@ -5034,9 +5196,17 @@ function medirRutaMensual({puesto,calendario,reposo,numeros,anchoActor,viewport,
         partida:[desde,[desde[0]+.16*a.w,desde[1]+.17*h],[margenExterior-.15*a.w,desde[1]+.45*h],[margenExterior,desde[1]+.82*h]],
         llegada:[[margenExterior,aterrizaje[1]-1.12*h],[margenExterior-.03*a.w,aterrizaje[1]-.53*h],
           [aterrizaje[0]+.20*a.w,aterrizaje[1]-.16*h],aterrizaje]};
+      if(vertical){
+        const f=ruta.firma,borde=1.4*a.w+18;
+        f.partidaVertical=corredorVertical(desde,[desde[0],finSalida+h+borde],salidaFirma,finSalida,h,a.w);
+        f.llegadaVertical=corredorVertical([aterrizaje[0],f.entradaFirma-borde],aterrizaje,
+          f.entradaFirma,llegadaFirma,h,a.w);
+      }
+      zonasDeLectura=tintaMovil.matches?textoEnElRecorrido.map(cajaDeRecorrido):[];
       medir=false;
     }
     function puntoEnCurva(p) {
+      if(ruta.vertical)return ruta.saludoVertical(p);
       const {pasos,muestras,largo,tramos,fin}=ruta;
       const recorrido=ritmoVuelo(p)*largo;
       let lo=0,hi=muestras.length-1;
@@ -5050,6 +5220,7 @@ function medirRutaMensual({puesto,calendario,reposo,numeros,anchoActor,viewport,
       return [x,y+p*fin];
     }
     function tangenteDeVuelo(p) {
+      if(ruta.vertical)return 90;
       const a=Math.max(0,p-.001),b=Math.min(1,p+.001);
       const u=puntoEnCurva(a),v=puntoEnCurva(b);
       return Math.atan2(v[1]-u[1]-(b-a)*ruta.fin,v[0]-u[0])*180/Math.PI;
@@ -5113,6 +5284,20 @@ function medirRutaMensual({puesto,calendario,reposo,numeros,anchoActor,viewport,
     // Both mounting points use the identical 100-unit viewport. Changing its
     // parent at the desk only changes paint order relative to the real lid.
     function situar(x,y,ancho,angulo) {
+      if(montaje.parentNode===espacio) {
+        // All cached boxes are in document space. Fade only the travelling
+        // artwork (including its wake), with no layer or filter on the text.
+        let visible=1;
+        const centroY=y+scrollY;
+        for(const caja of zonasDeLectura) {
+          const dx=Math.max(caja.x-x,0,x-caja.x-caja.w);
+          const dy=Math.max(caja.y-centroY,0,centroY-caja.y-caja.h);
+          const distancia=Math.hypot(dx,dy)/ancho;
+          visible=Math.min(visible,suave(distancia,.27,.53));
+        }
+        const opacidad=visible===1?'':visible.toFixed(3);
+        if(opacidad!==visibilidadEnVuelo){aire.style.opacity=opacidad;visibilidadEnVuelo=opacidad;}
+      }
       montaje.setAttribute('transform','translate('+x.toFixed(4)+' '+y.toFixed(4)+') rotate('+
         angulo.toFixed(3)+') scale('+(ancho/100).toFixed(6)+') translate(-50.566 -47.1)');
     }
@@ -5360,19 +5545,20 @@ function medirRutaMensual({puesto,calendario,reposo,numeros,anchoActor,viewport,
       cambiarLugar(cerca?'despegue-mes':'vuelo-mes');
       if(!cerca)puesto.quitar();
       const [x,y]=mensual.punto(p);
-      const [x0,y0]=mensual.punto(Math.max(0,p-.002)),[x1,y1]=mensual.punto(Math.min(1,p+.002));
       const marcha=haciaArriba?1:0;
       retornoMes=mezclar(retornoMes,marcha,1-Math.exp(-dt/105));
       if(Math.abs(retornoMes-marcha)<.002)retornoMes=marcha;
       else if(visible)pedir();
-      const tangente=Math.atan2(y1-y0,x1-x0)-Math.PI*retornoMes;
-      const direccion={x:Math.cos(tangente),y:Math.sin(tangente)};
+      const siguiente=ruta.vertical?null:mensual.punto(Math.min(1,p+.002));
+      const anterior=ruta.vertical?null:mensual.punto(Math.max(0,p-.002));
+      const tangente=(ruta.vertical?Math.PI/2:Math.atan2(siguiente[1]-anterior[1],siguiente[0]-anterior[0]))-Math.PI*retornoMes;
+      const direccion={x:Math.cos(tangente),y:Math.sin(tangente),vertical:ruta.vertical};
       // Tilt toward the direction of movement, including on the way back.
       const inclinacion=Math.atan2(direccion.x,-direccion.y)*180/Math.PI;
       const contacto=1-suave(p,0,.027), despegue=suave(p,.004,.075);
       const llegada=suave(p,.84,1);
       const impulso=suave(p,.022,.10)*(1-llegada);
-      const angulo=Math.max(-123,Math.min(123,inclinacion))*impulso;
+      const angulo=(ruta.vertical?174-180*retornoMes:Math.max(-123,Math.min(123,inclinacion)))*impulso;
       let pose=rig.blend(teclado.pose(contacto),rig.divePose(impulso,angulo,direccion),despegue);
       let giro=0, agarre=suave(p,.045,.12)*(1-llegada);
       const aireFrontal=.86*impulso;
@@ -5468,13 +5654,13 @@ function medirRutaMensual({puesto,calendario,reposo,numeros,anchoActor,viewport,
       regresoCrecimiento=mezclar(regresoCrecimiento,volver,1-Math.exp(-dt/95));
       if(Math.abs(regresoCrecimiento-volver)<.003)regresoCrecimiento=volver;
       else if(visible)pedir();
-      const tangente=viaje.direccion(p);
+      const tangente=ruta.vertical?{x:0,y:1}:viaje.direccion(p);
       const rumboVuelo=Math.atan2(tangente.y,tangente.x)-Math.PI*regresoCrecimiento;
-      const direccion={x:Math.cos(rumboVuelo),y:Math.sin(rumboVuelo)};
+      const direccion={x:Math.cos(rumboVuelo),y:Math.sin(rumboVuelo),vertical:ruta.vertical};
       const salida=suave(p,0,.20),freno=suave(p,.76,1);
       const impulso=salida*(1-freno);
       const rumboCuerpo=Math.atan2(direccion.x,-direccion.y)*180/Math.PI;
-      const meta=Math.max(-140,Math.min(140,rumboCuerpo))*impulso;
+      const meta=(ruta.vertical?174-180*regresoCrecimiento:Math.max(-140,Math.min(140,rumboCuerpo)))*impulso;
       const delta=((meta-rollCrecimiento+540)%360+360)%360-180;
       rollCrecimiento+=delta*(1-Math.exp(-dt/58));
       if(Math.abs(delta)<.3 || entrando || p<.003 || p>.997)rollCrecimiento=meta;
@@ -5607,16 +5793,18 @@ function medirRutaMensual({puesto,calendario,reposo,numeros,anchoActor,viewport,
       aire.hidden=enMargen;
       if(enMargen)return true;
       const curva=saliendo?r.partida:r.llegada;
-      const t=p*p*(3-2*p), [x,y]=bezierVuelo(curva,t);
-      const anterior=bezierVuelo(curva,Math.max(0,t-.002)),posterior=bezierVuelo(curva,Math.min(1,t+.002));
+      const t=p*p*(3-2*p);
+      const [x,y]=ruta.vertical?(saliendo?r.partidaVertical:r.llegadaVertical)(p):bezierVuelo(curva,t);
       const meta=haciaArriba?1:0;
       orientacionFirma=mezclar(orientacionFirma,meta,1-Math.exp(-dt/90));
       if(Math.abs(orientacionFirma-meta)<.003)orientacionFirma=meta;
       else if(visible)pedir();
-      const rumbo=Math.atan2(posterior[1]-anterior[1],posterior[0]-anterior[0])-Math.PI*orientacionFirma;
-      const direccion={x:Math.cos(rumbo),y:Math.sin(rumbo)};
+      const anterior=ruta.vertical?null:bezierVuelo(curva,Math.max(0,t-.002));
+      const posterior=ruta.vertical?null:bezierVuelo(curva,Math.min(1,t+.002));
+      const rumbo=(ruta.vertical?Math.PI/2:Math.atan2(posterior[1]-anterior[1],posterior[0]-anterior[0]))-Math.PI*orientacionFirma;
+      const direccion={x:Math.cos(rumbo),y:Math.sin(rumbo),vertical:ruta.vertical};
       const impulso=saliendo?suave(p,0,.40):1-suave(p,.60,1);
-      const angulo=Math.max(-138,Math.min(138,Math.atan2(direccion.x,-direccion.y)*180/Math.PI))*impulso;
+      const angulo=(ruta.vertical?174-180*orientacionFirma:Math.max(-138,Math.min(138,Math.atan2(direccion.x,-direccion.y)*180/Math.PI)))*impulso;
       const vuelo=rig.divePose(impulso,angulo,direccion);
       const despedida=saliendo?orgullo.muestra(segundosOrgullo,ruta.miradaAlDato):null;
       const saludo=saliendo?null:gestoFirma();
@@ -5694,7 +5882,7 @@ function medirRutaMensual({puesto,calendario,reposo,numeros,anchoActor,viewport,
       }
       // Path and attitude have separate clocks. The sternum stays on the
       // pencil curve while shoulders lead, the back rolls and the chin lifts.
-      const antes=ruta.giro, despues=ruta.salidaGiro;
+      const antes=ruta.vertical?.15:ruta.giro, despues=ruta.vertical?.29:ruta.salidaGiro;
       const preparar=suave(p,.07,antes+.045);
       const picada=suave(p,antes-.074,despues+.071);
       const preparado=.23*preparar+.77*picada;
@@ -5710,7 +5898,7 @@ function medirRutaMensual({puesto,calendario,reposo,numeros,anchoActor,viewport,
       if((rumbo!==meta || rumboOjos!==meta) && visible) pedir();
       const inclinacion=Math.min(120,Math.max(106,90+.84*ruta.pendiente));
       const subir=Math.max(34,Math.min(65,90-ruta.pendiente));
-      const guiada=mezclar(-inclinacion,subir,rumbo);
+      const guiada=ruta.vertical?174-180*rumbo:mezclar(-inclinacion,subir,rumbo);
       const ladear=mezclar(13,-11,rumbo)*preparar*(1-picada);
       const angulo=(ladear+guiada*picada)*(1-frenar);
       const cerca=p>=.868;
@@ -5718,7 +5906,7 @@ function medirRutaMensual({puesto,calendario,reposo,numeros,anchoActor,viewport,
       const tangente=tangenteDeVuelo(p);
       const mirada=(tangente-180*rumboOjos)*Math.PI/180;
       if(!cerca)puesto.quitar();
-      const vuelo=rig.divePose(preparado,angulo,{x:Math.cos(mirada),y:Math.sin(mirada)});
+      const vuelo=rig.divePose(preparado,angulo,{x:Math.cos(mirada),y:Math.sin(mirada),vertical:ruta.vertical});
       const pose=rig.blend(vuelo,teclado.pose(contacto),recoger);
       rig.setJoints(pose);
       const aireDeFrente=suave(p,antes,despues+.06)*(1-suave(p,.72,.92));
@@ -5726,7 +5914,7 @@ function medirRutaMensual({puesto,calendario,reposo,numeros,anchoActor,viewport,
       teclado.detail(contacto);
       punos.set(suave(p,.17,despues+.03)*(1-suave(p,.708,.87)));
       const [x,altura]=puntoEnCurva(p);
-      const y=altura+(sy-p*fin)*(1-suave(p,.79,.98));
+      const y=ruta.vertical?altura:altura+(sy-p*fin)*(1-suave(p,.79,.98));
       if(cerca) {
         const mesaX=26+(x-b.x)/unidadPuesto, mesaY=-12+(y-b.y)/unidadPuesto;
         situar(mesaX,mesaY,anchoEnPuesto,angulo);
@@ -5734,7 +5922,9 @@ function medirRutaMensual({puesto,calendario,reposo,numeros,anchoActor,viewport,
       } else {
         situar(x,y-sy,a.w,angulo);
         const empuje=anterior===null?0:limitar(Math.abs(p-anterior)*fin/(dt*1.25));
-        dibujarEstela(x,y-sy,a.w,tangente,p,empuje);
+        if(ruta.vertical)pintarEstela(x,y-sy,a.w,90-180*rumbo,
+          suave(p,.10,.35)*(1-suave(p,.72,.87))*suave(Math.abs(1-2*rumbo),.19,.85),empuje);
+        else dibujarEstela(x,y-sy,a.w,tangente,p,empuje);
       }
     }
     function invalidar() {medir=true; pedir();}
@@ -5744,6 +5934,7 @@ function medirRutaMensual({puesto,calendario,reposo,numeros,anchoActor,viewport,
         ...document.querySelectorAll('#lo-mas-visto,#protagonistas,#como-llegan,#inicio,.comienzo-texto')].forEach(el=>ro.observe(el));
     }
     window.addEventListener('resize',invalidar);
+    vueloTactil.addEventListener('change',invalidar);
     window.addEventListener('pageshow',()=>{visto=null; invalidar();});
     if(document.fonts) document.fonts.ready.then(invalidar);
     document.addEventListener('visibilitychange',()=>{
