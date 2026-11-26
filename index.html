@@ -880,6 +880,8 @@ html:not(.anim) main .texto-scroll{filter:none!important}
 }
 .qk-bateria-display svg {width:clamp(23px,4.8cqw,52px);height:auto;margin-bottom:.35cqw}
 .qk-bateria-estado {font-size:clamp(8px,1.22cqw,13px);font-variant-numeric:tabular-nums;color:#596779}
+.qk-bateria-display:not([data-estado="completa"]) .qk-pista-carga {display:none}
+.qk-pista-carga {font:700 clamp(10px,1.5cqw,14px)/1.35 var(--font-sans);color:#174fae}
 .qk-bateria-nivel {fill:#36afc1}
 .qk-bateria-display[data-estado="baja"] .qk-bateria-nivel {fill:#e65352}
 .qk-bateria-display[hidden] {display:none}
@@ -982,6 +984,26 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
 /* A single presenter and the active caption share the left column. The
    original list supplies the accessible transcript and all scroll anchors. */
 .qk-guia-mensual {display:none}
+.avance-mensual {display:none}
+@media screen {
+  .historia {--alto-avance:52px}
+  .avance-mensual:not([hidden]) {
+    position:absolute;inset:100% 0 auto;display:flex;align-items:center;
+    justify-content:center;gap:clamp(8px,1.3vw,16px);min-height:var(--alto-avance);
+    color:#535f73;font:400 12px/1.35 var(--font-sans);
+  }
+  #avanzar-mes {
+    display:inline-flex;align-items:center;justify-content:center;gap:7px;
+    min-height:44px;padding:8px 15px;flex:none;border:1px solid #c8d9fc;
+    border-radius:24px;background:#f2f6ff;color:#174fae;cursor:pointer;
+    font:700 13px/1.25 var(--font-sans);touch-action:manipulation;
+  }
+  #avanzar-mes:focus-visible {outline:2px solid #2866dd;outline-offset:2px}
+  #avanzar-mes:active {background:#dce8ff}
+  #avanzar-mes svg {width:16px;height:16px;flex:none}
+  #pista-mensual {max-width:20ch;text-wrap:balance}
+}
+@media (hover:hover) {#avanzar-mes:hover {background:#e4edff;border-color:#94b7f4}}
 #noviembre {scroll-margin-top:34svh}
 @media screen {
   .qk-capitulo-mensual .historia {
@@ -1029,7 +1051,7 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
     --aire-guia:clamp(8px,2cqi,18px);
     --ancho-guia:max(40%,calc(100cqi - var(--qknow-size) - var(--aire-guia)));
     --alto-guia:max(var(--qknow-size),var(--qk-alto-apunte));
-    --tope-equipo:clamp(60px,calc((100svh - var(--alto-equipo) - var(--alto-guia) - var(--aire-guia)) * .5),22svh);
+    --tope-equipo:clamp(54px,calc((100svh - var(--alto-equipo) - var(--alto-guia) - var(--aire-guia) - var(--alto-avance)) * .5),22svh);
     --qk-tope-guia:calc(var(--tope-equipo) + var(--alto-equipo) + var(--aire-guia));
     --qk-tope-carga:var(--qk-tope-guia);
     --qk-inicio-carga:calc(var(--alto-equipo) + var(--aire-guia));
@@ -1071,7 +1093,8 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
   .qk-capitulo-mensual #mes-a-mes :is(.qk-ancla-carga,.qk-mes-reposo) {justify-self:center}
   .qk-capitulo-mensual #mes-a-mes .qk-guia-mensual {
     grid-area:1/1;align-items:center;grid-template-columns:minmax(0,1fr) var(--qknow-size);
-    min-height:var(--alto-guia);column-gap:var(--aire-guia);margin-top:var(--qk-inicio-carga);top:var(--qk-tope-guia);
+    min-height:var(--alto-guia);column-gap:var(--aire-guia);
+    margin-top:calc(var(--qk-inicio-carga) + var(--alto-avance));top:calc(var(--qk-tope-guia) + var(--alto-avance));
   }
   .qk-capitulo-mensual #mes-a-mes .qk-guia-escena {align-self:center;margin:0}
   .qk-capitulo-mensual #mes-a-mes .qk-guia-texto {min-height:0;padding:0;gap:6px}
@@ -1115,19 +1138,26 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
       --qk-apilado:0;--ancho-guia:100%;--tope-equipo:clamp(44px,13svh,76px);
       --alto-disponible:clamp(125px,min(78svh,calc((100svh - var(--tope-equipo) - var(--qknow-size) - var(--aire-guia) - 12px) / .7)),390px);
       --ancho-equipo:min(calc((100cqi - clamp(12px,2cqi,22px)) * 2.15 / 3.15),calc(var(--alto-disponible) * 1.94));
-      --alto-tapa:min(calc(var(--alto-disponible) - clamp(22px,6cqi,42px)),calc(100svh - 34px - var(--ancho-equipo) * .20234375));
+      --alto-tapa:min(calc(var(--alto-disponible) - clamp(22px,6cqi,42px)),calc(100svh - 20px - var(--alto-avance) - var(--ancho-equipo) * .20234375));
       --qk-inicio-carga:calc(.58 * var(--alto-equipo) + var(--aire-guia));
       --qk-tope-guia:max(6px,calc((100svh - var(--qk-alto-apunte) - var(--qknow-size)) / 2));
       --qk-tope-carga:calc(var(--tope-equipo) + var(--qk-inicio-carga));
       display:grid;grid-template-columns:minmax(0,2.15fr) minmax(0,1fr);gap:clamp(12px,2cqi,22px);
     }
     #mes-a-mes .hist-grafica {grid-area:1/1;transform:none}
-    #mes-a-mes .historia.qk-leyendo .hist-grafica {top:clamp(8px,calc(100svh - var(--alto-equipo) - 5px),var(--tope-equipo))}
+    #mes-a-mes .historia.qk-leyendo .hist-grafica {top:clamp(8px,calc(100svh - var(--alto-equipo) - var(--alto-avance) - 5px),var(--tope-equipo))}
+    /* The silver base includes a transparent lower edge. Use that space for the control. */
+    #mes-a-mes .avance-mensual {top:calc(100% - 12px)}
+    @media (max-height:500px) {
+      #mes-a-mes .laptop-display {padding-block:6px;gap:4px}
+      #mes-a-mes .display-total strong {font-size:clamp(26px,5.6cqw,36px)}
+      #mes-a-mes .display-month {font-size:clamp(15px,3.25cqw,20px)}
+    }
     #mes-a-mes .laptop {transform-origin:50% 0}
     .anim #mes-a-mes .laptop {transition:transform 310ms var(--ease-salida)}
     .anim #mes-a-mes .laptop[data-datos-pendientes] {transform:scale(.58)}
     .qk-capitulo-mensual #mes-a-mes .qk-mes-reposo {z-index:3}
-    .qk-capitulo-mensual #mes-a-mes .qk-guia-mensual {grid-area:1/2;grid-template-columns:1fr;gap:4px;margin-top:0;z-index:3}
+    .qk-capitulo-mensual #mes-a-mes .qk-guia-mensual {grid-area:1/2;grid-template-columns:1fr;gap:4px;margin-top:0;top:var(--qk-tope-guia);z-index:3}
     .qk-capitulo-mensual #mes-a-mes .qk-guia-escena {grid-row:1}
     .qk-capitulo-mensual #mes-a-mes .hist-pasos {grid-area:1/2;padding:24svh 0}
     #mes-a-mes .historia .paso-txt {font-size:clamp(15px,2.3cqi,19px)}
@@ -1751,6 +1781,7 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
                     <rect class="qk-bateria-nivel" x="4.5" y="5" width="33" height="14" rx="2.5"/>
                   </svg>
                   <strong>Batería de QKnow</strong><span class="qk-bateria-estado"></span>
+                  <span class="qk-pista-carga">Desliza para ver febrero</span>
                 </div>
                 <div class="display-summary">
                   <div><p class="display-month" id="display-month">Febrero</p><p class="display-total"><strong id="display-visits">385</strong><span>visitas</span></p></div>
@@ -1778,6 +1809,13 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
                 <tr><th scope="row">Noviembre (al día 23)</th><td>742</td><td>23</td></tr>
               </tbody>
             </table>
+          </div>
+          <div class="avance-mensual" hidden>
+            <button type="button" id="avanzar-mes" aria-describedby="pista-mensual" aria-controls="display-month">
+              <span class="mes-accion">Siguiente mes</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v15m-6-6 6 6 6-6"/></svg>
+            </button>
+            <span id="pista-mensual">Desliza para cambiar de mes</span>
           </div>
         </figure>
         <div class="qk-guia-mensual" aria-hidden="true">
@@ -2536,10 +2574,14 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
     "1,000 visitas": "1,000 visits",
     "Carga baja": "Low battery",
     "Carga completa": "Fully charged",
+    "Desliza para ver febrero": "Scroll to see February",
     "Cargando · {porcentaje} %": "Charging · {porcentaje}%",
     "Cerrar menú de capítulos": "Close chapter menu",
     "La laptop de QKnow espera sobre el escritorio": "QKnow’s laptop is on the desk",
     "Gracias": "Thank you",
+    "Siguiente mes": "Next month",
+    "Siguiente mes, {mes}": "Next month, {mes}",
+    "Desliza para cambiar de mes": "Scroll to change months",
     "Esto lo logramos entre todos.": "We did this together.",
     "¡Vamos por más en 2027!": "Let’s build on it in 2027!",
     "Usar inglés": "Use English"
@@ -2711,10 +2753,10 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
     const final=meses[meses.length-1];
     return animar && ajusteLectura && linea<final ? final+(linea-final)/(1-ajusteLectura) : linea;
   }
-  function scrollParaElMismoMes(medidas,vh) {
-    const meses=medidas.meses, i=mesSolicitado, final=meses[meses.length-1];
+  function scrollParaMes(medidas,vh,i,fraccion) {
+    const meses=medidas.meses, final=meses[meses.length-1];
     const tramo=i+1<meses.length?meses[i+1]-meses[i]:final-meses[i-1];
-    const lectura=meses[i]+Math.max(1,tramo*fraccionDelMes);
+    const lectura=meses[i]+Math.max(1,tramo*fraccion);
     const linea=animar && lectura<final?final+(lectura-final)*(1-ajusteLectura):lectura;
     return linea-vh*(medidas.apilado?.68:.50);
   }
@@ -2727,6 +2769,47 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
 
   const portadaMensual=document.getElementById('mes-a-mes');
   let mesSolicitado=-1, datosPublicados=false, ultimaApertura='';
+  const botonMes=document.getElementById('avanzar-mes');
+  let destinoPulsado=-1, llegadaDelAvance=null, destinoRotulado=null, idiomaDelControl='';
+
+  function actualizarAvanceMensual(i) {
+    if(!botonMes)return;
+    const siguiente=datosPublicados && i>=0 && i<MESES.length-1?i+1:-1;
+    if(i<0 || i>=destinoPulsado)destinoPulsado=-1;
+    if(siguiente===destinoRotulado && idioma===idiomaDelControl)return;
+    destinoRotulado=siguiente;idiomaDelControl=idioma;
+    if(siguiente<0 && document.activeElement===botonMes && i===MESES.length-1) {
+      displayMes.tabIndex=-1;
+      displayMes.focus({preventScroll:true});
+    }
+    botonMes.parentElement.hidden=siguiente<0;
+    if(siguiente>=0){
+      const mes=MESES[siguiente].n;
+      botonMes.setAttribute('aria-label',t('Siguiente mes, {mes}').replace('{mes}',idioma==='es'?mes.toLowerCase():t(mes)));
+    }
+  }
+
+  if(botonMes) {
+    botonMes.addEventListener('click',()=>{
+      if(destinoRotulado===null || destinoRotulado<0)return;
+      const proximo=Math.max(destinoRotulado,destinoPulsado+1);
+      if(proximo>=MESES.length)return;
+      destinoPulsado=proximo;
+      const medidas=geometriaLectura || (geometriaLectura=medirLectura(scrollY));
+      llegadaDelAvance=Math.ceil(scrollParaMes(medidas,innerHeight,proximo,.12));
+      window.scrollTo({top:llegadaDelAvance,behavior:animar?'smooth':'instant'});
+    });
+    // An explicit scroll gesture supersedes a pending button destination.
+    const cancelarAvance=()=>{
+      if(llegadaDelAvance!==null)window.scrollTo({top:scrollY,behavior:'instant'});
+      llegadaDelAvance=null;destinoPulsado=-1;
+    };
+    window.addEventListener('wheel',cancelarAvance,{passive:true});
+    document.addEventListener('pointerdown',e=>{if(!botonMes.contains(e.target))cancelarAvance();},{passive:true});
+    document.addEventListener('keydown',e=>{
+      if(['ArrowUp','ArrowDown','PageUp','PageDown','Home','End'].includes(e.key))cancelarAvance();
+    });
+  }
 
   const indicadorCarga=laptop.querySelector('.qk-bateria-display');
   const rellenoCarga=indicadorCarga.querySelector('.qk-bateria-nivel');
@@ -2858,6 +2941,7 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
     el.toggleAttribute('data-pulso-b');
   }
   function aplicar(i, forzar) {
+    actualizarAvanceMensual(i);
     if (!forzar && i === actual) return;
     var cambio = i !== actual, previo = actual;
     actual = i;
@@ -3026,13 +3110,15 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
     pendiente=false;
     const vh=innerHeight, ancho=innerWidth;
     let sy=window.pageYOffset;
+    if(llegadaDelAvance!==null && Math.abs(llegadaDelAvance-sy)<=1)llegadaDelAvance=null;
     // A fold or rotation changes both the spacing of the month anchors and
     // the reading line. Preserve the reader's place once, on that reflow.
     // Ordinary touch scroll and the mobile browser bar keep native scrolling.
     if(ancho!==anchoDeLectura || Math.abs(vh-altoDeLectura)>altoDeLectura*.30) {
+      llegadaDelAvance=null;destinoPulsado=-1;
       geometriaLectura=medirLectura(sy);revisarLectura=true;
       if(enMesMedido && datosPublicados && mesSolicitado>=0) {
-        window.scrollTo({top:scrollParaElMismoMes(geometriaLectura,vh),behavior:'instant'});
+        window.scrollTo({top:scrollParaMes(geometriaLectura,vh,mesSolicitado,fraccionDelMes),behavior:'instant'});
         sy=window.pageYOffset;
       }
     }
@@ -6060,6 +6146,7 @@ function medirRutaMensual({puesto,calendario,reposo,numeros,anchoActor,viewport,
     boton.setAttribute('aria-label',t(cerrado?'Abrir menú de capítulos':'Cerrar menú de capítulos'));
   }
   function refrescarTextoDinamico() {
+    const conservarMes=enMesMedido && datosPublicados && mesSolicitado>=0;
     const referencia=lienzo && lienzo.querySelector('.hist-ref-et');
     if(referencia)referencia.textContent=t('1,000 visitas');
     ejes.forEach((eje,k)=>{eje.textContent=t(MESES[k].c);});
@@ -6069,7 +6156,11 @@ function medirRutaMensual({puesto,calendario,reposo,numeros,anchoActor,viewport,
     if(refrescarEtiquetaPuesto)refrescarEtiquetaPuesto();
     const boton=document.querySelector('.dock-toggle');
     if(boton)rotularBotonDock(boton);
-    geometriaLectura=null;
+    geometriaLectura=conservarMes?medirLectura(scrollY):null;
+    if(conservarMes) {
+      llegadaDelAvance=null;destinoPulsado=-1;
+      window.scrollTo({top:Math.ceil(scrollParaMes(geometriaLectura,innerHeight,mesSolicitado,fraccionDelMes)),behavior:'instant'});
+    }
     revisarLectura=true;
     if(viajeQKnow)viajeQKnow.invalidar();
     else pedir();
