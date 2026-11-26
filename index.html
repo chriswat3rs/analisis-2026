@@ -5393,7 +5393,7 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
     }
     const controlPortada=crearControlDeVuelo(), controlCalendario=crearControlDeVuelo();
     const controlCrecimiento=crearControlDeVuelo(), controlFirma=crearControlDeVuelo();
-    const PORTADA=0, ESCRITORIO=1, CIFRAS=2, MESES=3, CRECIMIENTO=4, ENTRE_SECCIONES=5, CIERRE=6;
+    const PORTADA=0, ESCRITORIO=1, CIFRAS=2, ESCENA_MENSUAL=3, CRECIMIENTO=4, ENTRE_SECCIONES=5, CIERRE=6;
     let escenaActiva=null;
     function escenaEnLectura(sy) {
       const umbrales=ruta.umbrales;
@@ -5955,7 +5955,7 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
     function dibujarTramoMensual(sy,dt,ahora,visible) {
       const {mensual,a,b,h}=ruta;
       const objetivo=escenaActiva<CIFRAS?0:escenaActiva===CIFRAS?mensual.corte:1;
-      const previo=progresoMes??(escenaActiva>=MESES?mensual.corte:0);
+      const previo=progresoMes??(escenaActiva>=ESCENA_MENSUAL?mensual.corte:0);
       const fuera=sy<mensual.inicio-.42*h || sy>mensual.fin+.42*h;
       const iniciando=lugar!=='despegue-mes' && lugar!=='vuelo-mes';
       if(objetivo<1 && transferencia>0 && visible && !fuera){
