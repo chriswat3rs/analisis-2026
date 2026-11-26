@@ -1033,6 +1033,8 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
   }
   .qk-guia-texto {padding-bottom:12px}
   .historia.qk-lectura-lista .qk-guia-texto {opacity:var(--noviembre-visible,1);transition:opacity 220ms ease-out}
+  #mes-a-mes.qk-relevo-intro .qk-guia-mensual {margin-top:calc(-1 * var(--qk-alto-intro))}
+  #mes-a-mes.qk-relevo-intro>.marco:has(.qk-leyendo)>.intro {opacity:0}
   .anim.qk-capitulo-mensual .hist-pasos::before {
     content:"";display:block;height:clamp(420px,94svh,1000px);
   }
@@ -3209,6 +3211,10 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
         const linea=lineaDeLosMeses(sy+vh*(dosColumnas?.5:.68),posiciones);
         let i=-1;
         for(let k=0;k<posiciones.length && posiciones[k]<linea;k++)i=k;
+        // A small backwards movement at the edge of a row should keep the
+        // same caption, bar and gesture until the reader re-enters the previous row.
+        if(i>=0 && mesSolicitado===i+1 && posiciones[mesSolicitado]-linea<Math.min(24,.03*vh))
+          i=mesSolicitado;
         if(i<0)fraccionDelMes=0;
         else {
           const tramo=i+1<posiciones.length?posiciones[i+1]-posiciones[i]:posiciones[i]-posiciones[i-1];
@@ -4483,12 +4489,12 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
 
   // Construct the sweep as the reader sees it. The round turn sits inside
   // the February card and shares a downward tangent with the outgoing arc.
-  const y0=origen[1]-inicio, y1=llegada[1]-fin;
+  const y0=origen[1]-inicio;
   const xGiro=calendario.x+.58*calendario.w;
   const yGiro=limitar(y0-.12*h,.22*h,.45*h);
   const faseGiro=limitar(avance(calendario.y+.54*calendario.h-yGiro),.18,.52);
   const radioGiro=Math.min(.32*calendario.h,.15*h);
-  const s=[origen[0],y0], g=[xGiro,yGiro], d=[llegada[0],y1];
+  const s=origen, g=[xGiro,calendario.y+.55*calendario.h], d=llegada;
   const ida=[s,[s[0]+.37*(g[0]-s[0]),s[1]-.085*h],[g[0],g[1]-radioGiro],g];
   const salida=[g,[g[0],g[1]+radioGiro],[d[0]+.37*(g[0]-d[0]),d[1]-.39*(d[1]-g[1])],d];
   const soltar=.061;
@@ -4500,19 +4506,13 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
     const t=entrando?u*u*(2-u):u*(1+u*(1-u)), v=1-t;
     return {c,t,v,entrando};
   }
-  function punto(p,scrollDeMuestra,alturaSalida=0){
-    const {c,t,v,entrando}=muestra(p);
-    const xy=[0,1].map(i=>v*v*v*c[0][i]+3*v*v*t*c[1][i]+3*v*t*t*c[2][i]+t*t*t*c[3][i]);
-    // Carry the real height of the keys into the first two control points.
-    // This gives a continuous launch even when the finger outpaces the rig.
-    if(entrando)xy[1]+=alturaSalida*v*v*(1+2*t);
-    xy[1]+=mezclar(inicio,fin,p);
-    return xy;
+  function punto(p){
+    const {c,t,v}=muestra(p);
+    return [0,1].map(i=>v*v*v*c[0][i]+3*v*v*t*c[1][i]+3*v*t*t*c[2][i]+t*t*t*c[3][i]);
   }
-  function rumbo(p,alturaSalida=0){
-    const {c,t,v,entrando}=muestra(p);
-    let [dx,dy]=[0,1].map(i=>v*v*(c[1][i]-c[0][i])+2*v*t*(c[2][i]-c[1][i])+t*t*(c[3][i]-c[2][i]));
-    if(entrando)dy-=2*v*t*alturaSalida;
+  function rumbo(p){
+    const {c,t,v}=muestra(p);
+    const [dx,dy]=[0,1].map(i=>v*v*(c[1][i]-c[0][i])+2*v*t*(c[2][i]-c[1][i])+t*t*(c[3][i]-c[2][i]));
     return Math.atan2(dy,dx)*180/Math.PI;
   }
   return {inicio,fin,origen,avance,punto,rumbo,llegada};
@@ -4696,19 +4696,23 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       const p=Math.max(0,Math.min(9,indiceMes)),i=Math.floor(p);
       return {a:meses[i],b:meses[Math.min(9,i+1)],i,t:p-i};
     }
-    // A single gesture inside a date follows its reading position in either
-    // direction. Both ends have zero value and zero velocity at the month cut.
+    // These small sweeps of the presenting arm play once when its row is read.
+    // Partial periods, the first thousand and the record also cue the free hand or eyes.
+    const acentosDeMano=[
+      [4,-6,-10], [-3,-9,-8], [5,4,7], [-4,-12,-15], [1,-3,-11],
+      [-3,-7,-9], [5,8,7], [-3,-6,-10], [-3,-8,-7], [-4,-7,-13]
+    ];
     function acentoDeLectura(indiceMes,lectura,retardo) {
       const mes=Math.round(indiceMes);
       const activo=1-suave(Math.abs(indiceMes-mes),0,.45);
       const peso=activo*suave(lectura,.12+retardo,.43+retardo)*(1-suave(lectura,.58+retardo,.91+retardo));
-      return {parcial:mes===0 || mes===2 ? peso:0,umbral:mes===5?peso:0,record:mes===7?peso:0};
+      return {peso,mano:acentosDeMano[mes],parcial:mes===0 || mes===2 ? peso:0,umbral:mes===5?peso:0,record:mes===7?peso:0};
     }
     function extremo([x,y],l,angulo) {
       return [x+l*Math.cos(angulo*rad),y+l*Math.sin(angulo*rad)];
     }
     // One continuous clock drives lift and joint follow-through across chapter
-    // changes. A null clock yields the exact scroll-only, reduced-motion pose.
+    // changes. A null clock yields the still, reduced-motion pose.
     const ciclo=2*Math.PI;
     function oleaje(segundos,demora=0) {
       if(segundos===null)return 0;
@@ -4768,9 +4772,9 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
           hombro-=20;antebrazo-=33;palma-=29;
         }
         if(presenta) {
-          hombro-=6*gesto.umbral+3*gesto.record;
-          antebrazo-=10*gesto.umbral+8*gesto.record;
-          palma+=2*gesto.umbral;
+          hombro+=atencion.peso*gesto.mano[0]-6*gesto.umbral-3*gesto.record;
+          antebrazo+=gesto.peso*gesto.mano[1]-10*gesto.umbral-8*gesto.record;
+          palma+=gesto.peso*gesto.mano[2]+2*gesto.umbral;
         } else {
           // The partial-period caption is above the guide, to the free-hand side.
           hombro=mezclar(hombro,145,gesto.parcial);
@@ -5152,7 +5156,7 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       const centro=Math.max(.03,Math.min(.91,p));
       const t0=centro-.02,t1=centro+.02;
       const desde=punto(t0), hasta=punto(t1);
-      const dy=hasta[1]-desde[1]-(t1-t0)*(fin-inicio);
+      const dy=hasta[1]-desde[1];
       return Math.atan2(dy,hasta[0]-desde[0])*180/Math.PI;
     }
     return {inicio,fin,origen,llegada,fraccionNoviembre,punto,rumboVisible,desplazamientoGuia,
@@ -5310,7 +5314,7 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
     const suave=(p,a,b)=>{const t=limitar((p-a)/(b-a));return t*t*(3-2*t);};
     let ruta, medir=true, activo=false, imprimiendo=false, lugar='';
     let entradaMensualPorEnlace=location.hash==='#mes-a-mes';
-    let visto=null, ultimo=0, marca=scrollY, ultimaPosicion=null, haciaArriba=false, rumbo=0;
+    let visto=null, ultimo=0, ultimaPosicion=null, rumbo=0;
     let origenDelAtajo=null, arcoDeViraje=-180;
     function bezierVuelo(c,t) {
       const s=1-t;
@@ -5325,20 +5329,22 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
     // time to change pose. Measure at layout time, outside the scroll loop.
     function medirCompas(inicio,fin,punto,segundosMinimos,angulo=null) {
       const n=96, tiempos=[0], pixelesPorSegundo=Math.min(530,ruta.a.w*1.65);
-      let anterior=punto(0,inicio), yAnterior=anterior[1]-inicio;
+      let anterior=punto(0,inicio);
       let inclinacionAnterior=angulo?angulo(0):0;
       for(let i=1;i<=n;i++) {
         const p=i/n, sy=mezclar(inicio,fin,p);
-        const actual=punto(p,sy), y=actual[1]-sy;
-        // Two offscreen ends of a mobile corridor are the same edit in the shot.
-        const cruceOculto=ruta.vertical && Math.min(y,yAnterior)<0 && Math.max(y,yAnterior)>ruta.h;
-        const distancia=cruceOculto?0:Math.hypot(actual[0]-anterior[0],y-yAnterior);
+        const actual=punto(p,sy);
+        const cambioDeColumna=ruta.vertical && Math.abs(actual[0]-anterior[0])>.13*ruta.a.w;
+        const distancia=cambioDeColumna?0:Math.hypot(actual[0]-anterior[0],actual[1]-anterior[1]);
         const inclinacion=angulo?angulo(p):0;
         const tiempoDeGiro=Math.abs(inclinacion-inclinacionAnterior)/150;
         tiempos.push(tiempos[i-1]+Math.max(segundosMinimos/n,distancia/pixelesPorSegundo,tiempoDeGiro));
         inclinacionAnterior=inclinacion;
-        anterior=actual;yAnterior=y;
+        anterior=actual;
       }
+      // Travel hidden between two chapters never extends a visible entrance.
+      const factor=Math.min(1,(segundosMinimos+1.15)/tiempos[n]);
+      for(let i=1;i<=n;i++)tiempos[i]*=factor;
       function tiempo(p) {
         const i=Math.min(n-1,Math.floor(p*n));
         return mezclar(tiempos[i],tiempos[i+1],p*n-i);
@@ -5347,7 +5353,8 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       return function seguir(previo,objetivo,dt,directo=false,velocidadMaxima=1) {
         if(directo || previo===null || previo===objetivo){velocidad=0;return objetivo;}
         const t=tiempo(previo), falta=tiempo(objetivo)-t;
-        const s=dt/1000, deseada=Math.max(-velocidadMaxima,Math.min(velocidadMaxima,falta/.20));
+        const s=dt/1000;
+        const deseada=Math.sign(falta)*Math.min(velocidadMaxima,Math.sqrt(6.4*Math.abs(falta)));
         // Brake the current movement before gathering speed in reverse.
         velocidad+=Math.max(-s*3.2,Math.min(s*3.2,deseada-velocidad));
         const paso=velocidad*s;
@@ -5367,92 +5374,53 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
         return (iz+(siguiente-tiempos[iz])/(tiempos[der]-tiempos[iz]))/n;
       };
     }
-    // On reversal, start the new stroke at the pose actually on screen. A
-    // long swipe can otherwise leave a whole previous flight queued up.
+    // A chapter chooses a destination. Only elapsed time moves the actor.
     function crearControlDeVuelo() {
-      let sentido=0, extremo=0, arranque=0, poseInicial=0, anclado=false, velocidadAngular=0;
-      let ultimaLectura=null, quietud=0, frenado=false;
-      return function leer(previo,lectura,rumbo,dt,recorrido,nuevo) {
-        if(lectura*recorrido<.51)lectura=0;
-        if((1-lectura)*recorrido<.51)lectura=1;
-        if(nuevo || lectura!==ultimaLectura){quietud=0;frenado=false;}
-        else quietud+=dt;
-        ultimaLectura=lectura;
-        if(nuevo || previo===null){
-          sentido=previo===null || previo===lectura?Number(haciaArriba):Number(lectura<previo);
-          extremo=lectura;anclado=false;velocidadAngular=0;rumbo=sentido;
-        } else {
-          extremo=sentido?Math.min(extremo,lectura):Math.max(extremo,lectura);
-          const retroceso=Math.abs(lectura-extremo);
-          // One or two pixels of wheel noise shouldn't turn the whole body.
-          const invertir=retroceso*recorrido>Math.min(18,.023*ruta.h) ||
-            (retroceso>0 && (lectura===0 || lectura===1));
-          if(invertir){
-            sentido=1-sentido;arranque=extremo;poseInicial=previo;
-            extremo=lectura;anclado=true;
-          }
-        }
-        let avance=lectura;
-        if(anclado){
-          const meta=1-sentido, tramo=meta-arranque;
-          avance=tramo?mezclar(poseInicial,meta,limitar((lectura-arranque)/tramo)):meta;
-        }
-        if(!nuevo && !frenado && quietud>=80 && lectura>.025 && lectura<.975 &&
-           Math.abs(avance-previo)>.028){
-          // If the reader stops midway through a swipe, coast only a few
-          // pixels. Resume the remaining portion of the same arc on input.
-          avance=previo+Math.sign(avance-previo)*.008;
-          arranque=lectura;poseInicial=avance;anclado=true;frenado=true;
-        }
+      let velocidadAngular=0;
+      return function orientar(previo,meta,rumbo,dt,nuevo) {
+        const sentido=previo===meta?Math.round(rumbo):Number(meta<previo);
+        if(nuevo){velocidadAngular=0;rumbo=sentido;}
         const s=dt/1000, error=sentido-rumbo;
         if(Math.abs(error)<.0005 && Math.abs(velocidadAngular)<.012){
           rumbo=sentido;velocidadAngular=0;
         } else {
-          // A critically damped turn keeps angular velocity continuous when
-          // the reader changes their mind halfway through a bank.
-          const aceleracion=49*error-14*velocidadAngular;
-          velocidadAngular=Math.max(-1.48,Math.min(1.48,velocidadAngular+aceleracion*s));
+          velocidadAngular=Math.max(-1.48,Math.min(1.48,velocidadAngular+(49*error-14*velocidadAngular)*s));
           rumbo=limitar(rumbo+velocidadAngular*s);
           pedir();
         }
-        return {avance,rumbo,sentido,alineado:1-suave(Math.abs(sentido-rumbo),.09,.70)};
+        return {rumbo,sentido,alineado:1-suave(Math.abs(sentido-rumbo),.09,.70)};
       };
     }
     const controlPortada=crearControlDeVuelo(), controlCalendario=crearControlDeVuelo();
     const controlCrecimiento=crearControlDeVuelo(), controlFirma=crearControlDeVuelo();
-    // The curves are in document space. While the page is ahead of the rig,
-    // sample the camera at the same progress as the pose. At either station,
-    // any scroll past the end of the leg carries the rig with its real host.
-    function compensarCamara(sy,inicio,fin,p) {
-      return Math.max(inicio,Math.min(fin,sy))-mezclar(inicio,fin,p);
-    }
-    function arrastreDeEstacion(sy,inicio,fin,p) {
-      const antes=Math.max(0,inicio-sy)*(1-suave(p,0,.09));
-      const despues=Math.min(0,fin-sy)*suave(p,.92,1);
-      return antes+despues;
+    const PORTADA=0, ESCRITORIO=1, CIFRAS=2, MESES=3, CRECIMIENTO=4, ENTRE_SECCIONES=5, CIERRE=6;
+    let escenaActiva=null;
+    function escenaEnLectura(sy) {
+      const umbrales=ruta.umbrales;
+      if(escenaActiva===null)escenaActiva=PORTADA;
+      while(escenaActiva<CIERRE && sy>=umbrales[escenaActiva])escenaActiva++;
+      // Reading near an edge shouldn't restart an entrance on a small reversal.
+      const margen=Math.min(64,ruta.h*.075);
+      while(escenaActiva>PORTADA && sy<umbrales[escenaActiva-1]-margen)escenaActiva--;
     }
     function sincronizarVuelos() {
-      visto=null;progresoMes=null;avanceCrecimiento=null;tramoFirma=null;
+      escenaActiva=null;visto=null;progresoMes=null;avanceCrecimiento=null;tramoFirma=null;
     }
     // A narrow screen can show the whole actor on a single vertical line.
     // If the next station is in a different column, connect the two verticals
     // outside the viewport, after the hands, body and slipstream have cleared it.
     function corredorVertical(desde,hasta,inicio,fin,h,tamano) {
-      const y0=desde[1]-inicio, y1=hasta[1]-fin;
       const borde=1.4*tamano+18;
-      const cambiarColumna=Math.abs(hasta[0]-desde[0])>Math.max(12,.13*tamano);
-      const porBordes=cambiarColumna || y1<y0+.075*h;
+      const dosColumnas=Math.abs(hasta[0]-desde[0])>Math.max(12,.13*tamano);
       return (p,sy=scrollY)=>{
-        const s=limitar(p);
-        // Scroll within the leg moves the camera and rig together. Only the
-        // distance outside either stop belongs to the page carrying its station.
-        const pagina=sy+arrastreDeEstacion(sy,inicio,fin,s);
-        if(!porBordes){
-          const t=ritmoVuelo(s);
-          return [mezclar(desde[0],hasta[0],t),pagina+mezclar(y0,y1,t)];
+        if(!dosColumnas){
+          const t=ritmoVuelo(p);
+          return [mezclar(desde[0],hasta[0],t),mezclar(desde[1],hasta[1],t)];
         }
-        if(s<.5)return [desde[0],pagina+mezclar(y0,h+borde,suave(s,0,.49))];
-        return [hasta[0],pagina+mezclar(-borde,y1,suave(s,.51,1))];
+        // Leave and re-enter on separate verticals. The cut is outside the
+        // visible page even when the visitor stops scrolling during the flight.
+        if(p<.5)return [desde[0],mezclar(desde[1],Math.max(inicio,sy)+h+borde,suave(p,0,.5))];
+        return [hasta[0],mezclar(Math.min(fin,sy)-borde,hasta[1],suave(p,.5,1))];
       };
     }
     function actualizarMedidas() {
@@ -5489,7 +5457,7 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       // Keep the original reading stop; the laptop scrolls normally after docking.
       const alturaTactil=Math.min(limiteY,Math.max(.60*h,inicio[1]+.9*a.h));
       const finPortada=vertical?Math.max(1,Math.min(finLecturaPuesto,destino[1]-alturaTactil)):fin;
-      const mesa=[destino[0],destino[1]-finPortada], dy=mesa[1]-inicio[1];
+      const mesa=destino, dy=mesa[1]-inicio[1];
       const margenGiro=8+.49*(w<600?Math.min(174,Math.max(138,.4*w)):Math.min(244,Math.max(178,.19*w)));
       const derecha=Math.min(.754*w,w-margenGiro);
       const giro=[derecha,inicio[1]+.216*dy];
@@ -5527,12 +5495,20 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
         -(parseFloat(getComputedStyle(capitulo).scrollMarginTop)||0);
       const inicioHistoria=cajaDeRecorrido(historia).y;
       historia.style.setProperty('--qk-tope-enlace',Math.ceil(inicioHistoria-ruta.portadaMensual)+'px');
+      // At the top of a two-column chapter the opening title and the first
+      // caption may not fit above the presenter together. Let them share
+      // their space so the entire actor stays visible without another scroll.
+      const altoIntro=inicioHistoria-cajaDeRecorrido(capitulo.querySelector('.intro')).y;
+      historia.style.setProperty('--qk-alto-intro',Math.ceil(altoIntro)+'px');
+      const centrada=getComputedStyle(historia).getPropertyValue('--qk-carga-centrada').trim()==='1';
+      capitulo.classList.toggle('qk-relevo-intro',!centrada &&
+        inicioHistoria-ruta.portadaMensual+altoApunte+a.h+44>h);
       ruta.reposo=cajaDeRecorrido(anclaEstacion);
       const cajaEscena=escenaGuia.getBoundingClientRect();
       ruta.tamanoGuia={width:cajaEscena.width,height:cajaEscena.height};
       const cajaNumeros=cajaDeRecorrido(numeros);
       ruta.inicioCifras=cajaNumeros.y;
-      ruta.cargaCentrada=getComputedStyle(historia).getPropertyValue('--qk-carga-centrada').trim()==='1';
+      ruta.cargaCentrada=centrada;
       ruta.mensual=medirRutaMensual({puesto:b,reposo:ruta.reposo,calendario:cajaDeRecorrido(seccion.querySelector('.calendario')),
         anchoActor:a.w,viewport:{w,h},finAnterior:finLecturaPuesto,
         portada:ruta.portadaMensual-1,cargaCentrada:ruta.cargaCentrada});
@@ -5545,6 +5521,14 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
         const m=ruta.mensual;
         m.punto=corredorVertical(destino,m.llegada,m.inicio,m.fin,h,a.w);
       }
+      const mRuta=ruta.mensual;
+      const yOculta=cajaNumeros.y+.44*cajaNumeros.h;
+      let iz=0,der=1;
+      if(!vertical)for(let i=0;i<12;i++){
+        const p=(iz+der)/2;
+        if(mRuta.punto(p)[1]<yOculta)iz=p;else der=p;
+      }
+      mRuta.corte=vertical?.5:(iz+der)/2;
       const arriba=guiaDebajoDePantalla();
       const primeraLectura=cajaDeRecorrido(anclas[0]).y-h*(arriba?.68:.50);
       const inicioGuia=Math.max(ruta.mensual.fin+.08*h,inicioHistoria-.30*h);
@@ -5585,8 +5569,19 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
           f.entradaFirma,llegadaFirma,h,a.w);
       }
       const m=ruta.mensual,c=ruta.crece,f=ruta.firma;
+      // A chapter link must land inside its own scene from either direction,
+      // including the gap used to keep small scroll reversals from retriggering.
+      const margenDeEnlace=Math.min(64,h*.075)+8;
+      ruta.umbrales=[
+        Math.max(.20*h,cajaDeRecorrido(seccion).y-.76*h,destino[1]-.935*h),
+        Math.max(ancla+2+margenDeEnlace,m.inicio,Math.min(m.origen[1]-.16*h,cajaNumeros.y-.85*h)),
+        Math.max(cajaNumeros.y-padding+margenDeEnlace,m.inicio+.20*h,cajaDeRecorrido(capitulo).y-.80*h),
+        Math.max(ruta.inicioNoviembre+.80*ruta.pasoNoviembre,cajaDeRecorrido(crecimiento).y-.82*h),
+        Math.max(cajaDeRecorrido(crecimiento).y-padding+margenDeEnlace,cajaDeRecorrido(document.getElementById('lo-mas-visto')).y-.78*h),
+        Math.min(document.documentElement.scrollHeight-h,cajaDeRecorrido(cierre).y-.75*h)
+      ];
       ruta.compasPortada=medirCompas(0,finPortada,
-        (p,sy)=>puntoEnCurva(faseDePortada(p),sy),2.8,p=>{
+        p=>puntoEnCurva(faseDePortada(p)),2.8,p=>{
           const banco=90+tangenteDeVuelo(faseDePortada(p));
           return inclinacionPortada(p,banco,vertical?0:360);
         });
@@ -5601,25 +5596,11 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       zonasDeLectura=tintaMovil.matches?textoEnElRecorrido.map(cajaDeRecorrido):[];
       medir=false;
     }
-    function puntoEnCurva(p,sy=scrollY) {
-      // Within the first beat the joints initiate the push at the origin.
-      // By the time the curve bends, distance follows the original timing.
+    function puntoEnCurva(p) {
       const salida=p*suave(p,.035,.19);
-      // The visible arc ends at the keys. Only scroll beyond the landing
-      // moves that endpoint; braking never sends the wrists below the deck.
-      const extra=Math.max(0,sy-ruta.finPortada);
-      // On the return stroke the keyboard initially moves with the page.
-      // Keep the fingertips in contact as they lift, then release the camera.
-      const retraso=Math.max(0,p*ruta.finPortada-sy);
-      const alcance=Math.max(1,.42*ruta.a.w);
-      const contacto=alcance*Math.tanh(retraso/alcance)*suave(p,.71,.965);
       if(ruta.vertical){
-        // Interpolate the two visible sternum positions. The original actor
-        // stays on screen through the entire mobile greeting-to-desk shot.
-        const {inicio,destino,finPortada}=ruta;
-        const t=mezclar(salida,ritmoVuelo(salida),.48);
-        const x=mezclar(inicio[0],destino[0],ritmoVuelo(t));
-        return [x,sy+mezclar(inicio[1],destino[1]-finPortada,t)-extra+contacto];
+        const {inicio,destino}=ruta, t=ritmoVuelo(salida);
+        return [mezclar(inicio[0],destino[0],t),mezclar(inicio[1],destino[1],t)];
       }
       const {pasos,muestras,largo,tramos}=ruta;
       const recorrido=ritmoVuelo(salida)*largo;
@@ -5631,16 +5612,13 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       const paso=lo+(recorrido-muestras[lo])/(muestras[hi]-muestras[lo]||1);
       const tramo=Math.min(2,Math.floor(paso/pasos));
       const [x,y]=bezierVuelo(tramos[tramo],paso/pasos-tramo);
-      // Past the end of this shot the camera carries the entire curve with
-      // the workstation. Its tangent still points down toward the keyboard.
-      return [x,sy+y-extra+contacto];
+      return [x,y];
     }
     function tangenteDeVuelo(p) {
       if(ruta.vertical)return 90;
       const a=Math.max(0,p-.001),b=Math.min(1,p+.001);
-      const sa=a*ruta.finPortada,sb=b*ruta.finPortada;
-      const u=puntoEnCurva(a,sa),v=puntoEnCurva(b,sb);
-      const dx=v[0]-u[0],dy=(v[1]-sb)-(u[1]-sa);
+      const u=puntoEnCurva(a),v=puntoEnCurva(b);
+      const dx=v[0]-u[0],dy=v[1]-u[1];
       if(Math.hypot(dx,dy)<.001) {
         const [inicio,control]=p<.5?ruta.tramos[0]:ruta.tramos[2].slice(2);
         return Math.atan2(control[1]-inicio[1],control[0]-inicio[0])*180/Math.PI;
@@ -5742,9 +5720,8 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       estela.setAttribute('opacity',(intensidad*(.79+.21*empuje)).toFixed(3));
       estela.setAttribute('visibility','visible');
     }
-    // Scroll carries the character between the desk and the monthly heading.
-    // Once the whole figure is in view, the turn, breath and salute can finish
-    // on their own. Returning to the keyboard retraces the same document path.
+    // The desk, calendar and monthly introduction share one actor. Its
+    // arrival, recharge and handoff run on visible time at the monthly station.
     const duracionGiro=1340, duracionSuspiro=1030, duracionCarga=6000, duracionFestejo=650;
     // Give the connector 1.65 s to reach the CPU, 2.5 s to fill it and
     // 0.85 s to show a full battery before the hand returns the cable.
@@ -5783,32 +5760,41 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
     }
     // The caption, the illuminated bar and the target pose share one month index.
     // Only the pose takes a short time to settle after the reader crosses a date.
-    let mesObjetivo=-1, mesDePartida=0, mesEnEscena=0, cambioDesde=0;
+    let mesObjetivo=-1, mesDePartida=0, mesEnEscena=0;
     let duracionCambio=230, poseMostrada=null, poseDePartida=null, expresionDePartida=null;
     let mezclaTransferencia=0, mesPintado=null, pesoPintado=-1, arribaPintado=null;
     let guiaVisible=false, origenRelojGuia=0, ultimoCuadroGuia=-1;
-    let lecturaPintada=-1, lecturaDePartida=0, puntoGuia=[0,0];
+    const duracionGestoMensual=1650;
+    let tiempoActuacion=0, marcaActuacion=null, lecturaPintada=-1, puntoGuia=[0,0];
     function dejarGuia(conservarNoviembre=false) {
       guiaVisible=false; mesObjetivo=-1; mesPintado=null; pesoPintado=-1;
       poseMostrada=null;poseDePartida=null;expresionDePartida=null;
+      marcaActuacion=null;
       historia.classList.remove('qk-leyendo');
       if(!conservarNoviembre)historia.classList.remove('qk-lectura-lista');
       gestos.limpiar();
     }
     function pintarGesto(ahora) {
-      const vivo=guiaVisible && lugar==='guia-mes' && !imprimiendo;
-      if(vivo && !document.hidden)pedir();
-      const fase=limitar((ahora-cambioDesde)/duracionCambio);
-      mesEnEscena=mezclar(mesDePartida,mesObjetivo,fase);
+      const vivo=guiaVisible && lugar==='guia-mes' && !imprimiendo && !document.hidden;
+      if(vivo)pedir();
       const peso=mezclaTransferencia, arriba=ruta.guia.arriba;
-      const metaLectura=mezclar(lecturaDePartida,fraccionDelMes,fase);
-      const dt=Math.min(80,Math.max(0,ahora-ultimoCuadroGuia));
-      const seguirLectura=vivo && ultimoCuadroGuia>=0 && Math.abs(metaLectura-lecturaPintada)>.002;
-      const lectura=seguirLectura?mezclar(lecturaPintada,metaLectura,-Math.expm1(-dt/70)):metaLectura;
+      // Wait for the caption and the handoff. From then on, only visible
+      // animation time advances the performance, even with the wheel at rest.
+      const enLectura=vivo && peso===1 && datosPublicados && actual>=0;
+      if(enLectura && marcaActuacion!==null){
+        tiempoActuacion=Math.min(duracionGestoMensual,tiempoActuacion+Math.max(0,ahora-marcaActuacion));
+      }
+      marcaActuacion=enLectura?ahora:null;
+      const fase=limitar(tiempoActuacion/duracionCambio);
+      mesEnEscena=mezclar(mesDePartida,mesObjetivo,fase);
+      const lectura=tiempoActuacion/duracionGestoMensual;
       const segundos=vivo?Math.max(0,(ahora-origenRelojGuia)/1000):null;
       const movimiento=vivo && (ahora-ultimoCuadroGuia>=1000/65 || ultimoCuadroGuia<0);
       if(movimiento || mesEnEscena!==mesPintado || peso!==pesoPintado || arriba!==arribaPintado || lectura!==lecturaPintada) {
-        situar(puntoGuia[0],puntoGuia[1]+peso*gestos.desplazamiento(segundos),ruta.a.w,0);
+        const recorrido=lugar==='guia-mes'?peso*mesEnEscena/(MESES.length-1):0;
+        const dx=arriba?0:.065*ruta.a.w*recorrido;
+        const dy=.046*ruta.a.w*recorrido+peso*gestos.desplazamiento(segundos);
+        situar(puntoGuia[0]+dx,puntoGuia[1]+dy,ruta.a.w,0);
         const muestraMes=poseDePartida?mesObjetivo:mesEnEscena;
         let pose=gestos.muestra(muestraMes,arriba,lectura,segundos), giro=0;
         if(poseDePartida && fase<1)pose=rig.blend(poseDePartida,pose,suave(fase,0,1));
@@ -5841,27 +5827,25 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       }
 
       const objetivo=Math.max(0,actual);
-      if(objetivo!==mesObjetivo || entrando || !visible) {
+      if(objetivo!==mesObjetivo || entrando) {
         // Preserve the authored beats for adjacent months. If a second swipe
         // interrupts one, redirect the fingers, joints and eyes from the frame
         // the reader actually saw, directly toward the newly selected date.
         const enEscena=!estatico && visible && !entrando && poseMostrada!==null;
-        const interrumpido=ultimoCuadroGuia-cambioDesde<duracionCambio;
+        const interrumpido=tiempoActuacion<duracionGestoMensual;
         const atajo=enEscena && (Math.abs(objetivo-mesObjetivo)>1 || interrumpido);
         poseDePartida=atajo?poseMostrada:null;
         expresionDePartida=atajo?gestos.expresion:null;
         mesDePartida=enEscena?mesEnEscena:objetivo;
-        lecturaDePartida=enEscena && lecturaPintada>=0?lecturaPintada:fraccionDelMes;
         duracionCambio=atajo?310:230;
-        mesObjetivo=objetivo;cambioDesde=ahora;
+        mesObjetivo=objetivo;tiempoActuacion=estatico?duracionGestoMensual:0;marcaActuacion=null;
       }
       mezclaTransferencia=peso;
-      const {a,mensual}=ruta;
+      const {mensual}=ruta;
       const [x0,y0]=mensual.llegada;
       guiaVisible=visible && (peso<1 || enPantalla(escenaGuia));
-      const recorrido=estatico?0:(objetivo+fraccionDelMes)/MESES.length;
-      let x=.50566*ruta.tamanoGuia.width+(ruta.guia.arriba?0:.065*a.w*recorrido);
-      let y=.471*ruta.tamanoGuia.height+.046*a.w*recorrido;
+      let x=.50566*ruta.tamanoGuia.width;
+      let y=.471*ruta.tamanoGuia.height;
       if(peso<1){
         // Only the handoff between the two sticky scenes needs screen coordinates.
         const pie=escenaGuia.getBoundingClientRect();
@@ -5875,39 +5859,29 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       pintarGesto(ahora);
     }
 
-    function sentarEnMes(sy,ahora,visible,estatico=false) {
+    function sentarEnMes(sy,ahora,visible,estatico=false,regresar=false) {
       const {mensual,reposo,a}=ruta;
       if(ruta.cargaCentrada && entradaMensualPorEnlace && Math.abs(sy-ruta.portadaMensual)<2) {
         entradaMensualPorEnlace=false;
-        haciaArriba=false;
         tiempoMes=0;ultimoGesto=-1;
         dejarEstacionMensual();
       }
-      const enlace=suave(sy,ruta.guia.inicio,ruta.guia.fin);
-      // Restored positions and chapter links can enter the story after February.
-      const salto=estatico || sy>=ruta.guia.final || (!enCapitulo && sy>ruta.guia.primera+.52*ruta.h && (!ruta.cargaCentrada || mesSolicitado>0));
+      // Entering a later date goes straight to that date. Within the opening
+      // scene, only visible time advances the turn, breath, cable and battery.
+      const salto=estatico || sy>=ruta.guia.final || (sy>ruta.guia.primera && mesSolicitado>0);
       enCapitulo=true;
-      const aLaVista=!estatico && visible && (enPantalla(reposoMensual) || (ruta.cargaCentrada && enPantalla(escenaGuia)));
-      // The complete charge plays at rest. Moving into February carries its
-      // remaining frames forward so later months respond to the actual scroll.
-      const avanceFebrero=suave(sy,ruta.guia.primera-.12*ruta.h,ruta.guia.primera+.38*ruta.h);
-      if(salto){
-        tiempoMes=duracionLlegada; transferencia=enlace;
-      }else if(aLaVista && tiempoMes<duracionLlegada){
-        const transcurrido=relojMes===null?0:Math.max(0,ahora-relojMes);
-        tiempoMes=Math.max(duracionLlegada*avanceFebrero,Math.min(duracionLlegada,tiempoMes+transcurrido));
-      }
+      const aLaVista=!estatico && visible && (enPantalla(reposoMensual) || enPantalla(escenaGuia));
+      if(salto)tiempoMes=duracionLlegada;
+      else if(aLaVista && relojMes!==null && !regresar)
+        tiempoMes=Math.min(duracionLlegada,tiempoMes+Math.max(0,ahora-relojMes));
       relojMes=aLaVista?ahora:null;
-      const ladoGuia=ruta.cargaCentrada?(haciaArriba?suave(sy,mensual.fin,ruta.guia.fin):1):enlace;
-      const objetivo=tiempoMes>=inicioCarga+duracionCarga?ladoGuia:0;
-      const dt=frameTransferencia===null?0:Math.min(64,Math.max(0,ahora-frameTransferencia));
-      frameTransferencia=ahora;
-      if(salto)transferencia=ruta.cargaCentrada?1:objetivo;
-      else if(ruta.cargaCentrada && aLaVista){
-        const paso=dt/620;
+      const objetivo=tiempoMes===duracionLlegada && !regresar?1:0;
+      if(salto || (regresar && !aLaVista))transferencia=objetivo;
+      else if(aLaVista && frameTransferencia!==null){
+        const paso=Math.max(0,ahora-frameTransferencia)/650;
         transferencia=objetivo>transferencia?Math.min(objetivo,transferencia+paso):Math.max(objetivo,transferencia-paso);
-      }else if(objetivo<transferencia)transferencia=objetivo;
-      else if(aLaVista)transferencia=Math.min(objetivo,Math.max(transferencia+dt/410,suave(avanceFebrero,.92,1)));
+      }
+      frameTransferencia=aLaVista?ahora:null;
       const colocado=transferencia===1;
       if(colocado && !febreroColocado){
         febreroColocado=true;
@@ -5920,12 +5894,12 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       if(colocado && asentadoDesde===null)asentadoDesde=ahora;
       if(!colocado)asentadoDesde=null;
       const conGrafica=estatico || (colocado && (salto || ahora-asentadoDesde>=90));
-      historia.classList.toggle('qk-lectura-lista',ruta.cargaCentrada?conGrafica:colocado);
+      historia.classList.toggle('qk-lectura-lista',conGrafica);
       publicarPantallaMensual(conGrafica);
       if(aLaVista && ((colocado && !conGrafica) || transferencia!==objetivo))pedir();
       if(transferencia>0){
         if(!conGrafica)indicarCargaMensual('completa',1);
-        presentarMes(ahora,visible,estatico,ruta.cargaCentrada?ritmoVuelo(transferencia):transferencia);
+        presentarMes(ahora,visible,estatico,ritmoVuelo(transferencia));
         return;
       }
       const estado=estatico?'mes-estatico':'reposo-mes';
@@ -5977,56 +5951,42 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       progresoMes=0; tiempoMes=0; relojMes=null; ultimoGesto=-1; retornoMes=0;
       descanso.limpiar();
     }
-    let desfaseDeSalida=0, alturaSalida=0, reposoDelCalendario=0;
+    let reposoDelCalendario=0;
     function dibujarTramoMensual(sy,dt,ahora,visible) {
       const {mensual,a,b,h}=ruta;
-      const objetivo=mensual.avance(sy), previo=progresoMes;
+      const objetivo=escenaActiva<CIFRAS?0:escenaActiva===CIFRAS?mensual.corte:1;
+      const previo=progresoMes??(escenaActiva>=MESES?mensual.corte:0);
       const fuera=sy<mensual.inicio-.42*h || sy>mensual.fin+.42*h;
       const iniciando=lugar!=='despegue-mes' && lugar!=='vuelo-mes';
-      const mando=controlCalendario(previo,objetivo,retornoMes,dt,mensual.fin-mensual.inicio,iniciando);
-      const {sentido:marcha,alineado}=mando;
-      retornoMes=mando.rumbo;
-      progresoMes=mensual.compas(previo,mando.avance,dt,!visible || fuera,alineado);
-      const p=progresoMes;
-      if(p===0){desfaseDeSalida=0;salirDeMes();return false;}
-      if(p===1){desfaseDeSalida=0;sentarEnMes(sy,ahora,visible);return true;}
-      if(ruta.cargaCentrada && transferencia>0 && haciaArriba && sy>mensual.fin-.24*h && visible){
-        sentarEnMes(sy,ahora,visible);
+      if(objetivo<1 && transferencia>0 && visible && !fuera){
+        // Bring the same presenter back to the launch mark before its flight
+        // clock starts. Reversing again during this handoff is continuous.
+        sentarEnMes(sy,ahora,visible,false,true);
         if(transferencia>0)return true;
       }
+      const mando=controlCalendario(previo,objetivo,retornoMes,dt,iniciando);
+      const {sentido:marcha,alineado}=mando;
+      retornoMes=mando.rumbo;
+      progresoMes=mensual.compas(previo,objetivo,dt,!visible || fuera,alineado);
+      const p=progresoMes;
+      if(p===0){salirDeMes();return false;}
+      if(p===1){sentarEnMes(sy,ahora,visible);return true;}
       dejarEstacionMensual();
       relojMes=null;
       if(p<.84)tiempoMes=0;
-      // Keep the keyboard's foreground layer while the hands are at the desk.
-      // A fast swipe can carry that SVG away before the flight clock takes off.
-      const margen=Math.min(.18*a.w,.1*h);
-      const yDeLasTeclas=mensual.origen[1]-sy;
-      const cerca=p<=.028 && yDeLasTeclas>=margen && yDeLasTeclas<=h-margen;
-      const anclaje=Math.min(Math.max(0,sy-mensual.inicio),Math.max(0,mensual.origen[1]-mensual.inicio-margen));
-      if(iniciando || p<=.028)alturaSalida=p<.10?-anclaje:0;
-      else if(p<.052)alturaSalida+=(-anclaje-alturaSalida)*(1-suave(p,.028,.052))*(-Math.expm1(-dt/46));
-      const [x,yRuta]=mensual.punto(p,sy,alturaSalida);
-      const camara=ruta.vertical?alturaSalida*(1-suave(p,.055,.32)):
-        sy-mezclar(mensual.inicio,mensual.fin,p)+arrastreDeEstacion(sy,mensual.inicio,mensual.fin,p);
-      const yBase=yRuta+camara;
-      const entrega=!cerca && (lugar==='teclado' || lugar==='despegue-mes' || lugar==='reposo-mes' || lugar==='guia-mes');
-      if(entrega && !fuera){
-        // The compositor may have already scrolled the station. Start the
-        // fixed layer where its sternum is painted in this viewport.
-        const real=lugar==='teclado'?ruta.destino[1]-sy:
-          new DOMPoint(50.566,47.1).matrixTransform(montaje.getScreenCTM()).y;
-        desfaseDeSalida=Math.max(margen,Math.min(h-margen,real))-(yBase-sy);
-      }else if(desfaseDeSalida){
-        desfaseDeSalida*=Math.exp(-Math.min(dt,48)/200);
-        if(Math.abs(desfaseDeSalida)<.15 || cerca)desfaseDeSalida=0;
-        else pedir();
-      }
-      const y=yBase+desfaseDeSalida;
+      // Keep the keyboard in front of the wrists until they leave the desk.
+      const [x,y]=mensual.punto(p,sy);
+      const cerca=p<=.04;
       cambiarLugar(cerca?'despegue-mes':'vuelo-mes');
       if(!cerca)puesto.quitar();
+      if(p===mensual.corte && objetivo===p){
+        aire.hidden=true;
+        return true;
+      }
+      if(!cerca)aire.hidden=false;
       // Use the tangent of the actual sweep for the chassis, gaze and wake.
       // The heading continues through the back of the card without a ±180° flip.
-      const tangente=ruta.vertical?90:mensual.rumbo(p,alturaSalida);
+      const tangente=ruta.vertical?90:mensual.rumbo(p);
       const rumbo=tangente-180*retornoMes, rad=Math.PI/180;
       const mirar=rumbo+Math.max(-18,Math.min(18,180*(retornoMes-marcha)));
       const direccion={x:Math.cos(rumbo*rad),y:Math.sin(rumbo*rad),
@@ -6077,11 +6037,7 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       return {tramo:p<.5?recorrido:1-recorrido,salida,freno,impulso:salida*(1-freno)};
     }
     function medirCompasCrecimiento(viaje,vertical) {
-      function centro(p,sy) {
-        const {tramo}=gestoCrecimiento(p), xy=viaje.punto(tramo,sy);
-        if(!vertical)xy[1]+=(p-tramo)*(viaje.fin-viaje.inicio);
-        return xy;
-      }
+      const centro=(p,sy)=>viaje.punto(gestoCrecimiento(p).tramo,sy);
       let ultimaIda=0, ultimaVuelta=0, grados=0;
       const cercanos=g=>((g+180)%360+360)%360-180;
       function giro(p) {
@@ -6114,8 +6070,8 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
 
     function dibujarCrecimiento(sy,ahora,dt,visible) {
       const viaje=ruta.crece;
-      const objetivo=viaje.avance(sy);
-      const previo=avanceCrecimiento;
+      const objetivo=Number(escenaActiva>=CRECIMIENTO);
+      const previo=avanceCrecimiento??Number(escenaActiva>CRECIMIENTO);
       if(objetivo===0 && (previo===null || previo===0)){avanceCrecimiento=0;return false;}
       // Readers can also enter at the chapter link, or revisit it from below.
       // During a normal read the station can use the remaining lead-in to finish.
@@ -6123,10 +6079,10 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       const siguienteVisible=lugar==='vuelo-crecimiento' && sy<=ruta.firma.salidaFirma+.46*ruta.h;
       const salto=previo===null || !visible || sy<viaje.inicio-.4*ruta.h || (sy>viaje.fin+.42*ruta.h && !siguienteVisible);
       const entrando=lugar!=='vuelo-crecimiento';
-      const mando=controlCrecimiento(previo,objetivo,regresoCrecimiento,dt,viaje.fin-viaje.inicio,entrando);
+      const mando=controlCrecimiento(previo,objetivo,regresoCrecimiento,dt,entrando);
       const {sentido:volver,alineado}=mando;
       regresoCrecimiento=mando.rumbo;
-      const p=viaje.compas(previo,mando.avance,dt,salto,alineado);
+      const p=viaje.compas(previo,objetivo,dt,salto,alineado);
       avanceCrecimiento=p;
       if(p===0) {
         regresoCrecimiento=0;segundosOrgullo=0;
@@ -6169,7 +6125,7 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
 
       const vuelo=rig.divePose(1,rollCrecimiento,direccion);
       const segundosNov=origenRelojGuia?Math.max(0,(ahora-origenRelojGuia)/1000):null;
-      const lectura=limitar((sy-ruta.inicioNoviembre)/ruta.pasoNoviembre);
+      const lectura=limitar(tiempoActuacion/duracionGestoMensual);
       let pose=vuelo;
       if(salida<1){
         const nov=gestos.muestra(9,ruta.guia.arriba,lectura,segundosNov);
@@ -6189,9 +6145,9 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
         segundosOrgullo=0;
       }
 
-      const [x,yRuta]=viaje.punto(tramo);
+      const [x,yRuta]=viaje.punto(tramo,sy);
       const acople=1-suave(tramo,0,.09);
-      const y=yRuta+(ruta.vertical?0:compensarCamara(sy,viaje.inicio,viaje.fin,tramo))+acople*viaje.desplazamientoGuia(sy);
+      const y=yRuta+acople*viaje.desplazamientoGuia(sy);
       const flotacion=(1-salida)*gestos.desplazamiento(segundosNov)+freno*gestoFinal.altura;
       situar(x,y-sy+flotacion,ruta.a.w,rollCrecimiento);
       const empuje=previo===null?0:limitar(Math.abs(p-previo)*(viaje.fin-viaje.inicio)/(dt*1.15));
@@ -6277,13 +6233,7 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
     }
     function medirTramoFirma(r,saliendo) {
       const inicio=saliendo?r.salidaFirma:r.entradaFirma, fin=saliendo?r.finSalida:r.llegadaFirma;
-      const original=saliendo?r.partida:r.llegada;
-      const estacionY=saliendo?original[0][1]-inicio:original[3][1]-fin;
-      const altura=(saliendo?.44:.52)*ruta.h;
-      const y0=saliendo?estacionY:estacionY-altura;
-      // The same curve drives the displayed centre, the joints and the wake.
-      // Its offstage end is below the departing station or above the landing.
-      const curva=original.map(([x,y])=>[x,y0+altura*(y-original[0][1])/(original[3][1]-original[0][1])]);
+      const curva=saliendo?r.partida:r.llegada;
       const vertical=saliendo?r.partidaVertical:r.llegadaVertical;
       const u=p=>limitar(saliendo?(p-.052)/.948:p/.948);
       const postura=p=>suave(saliendo?p:1-p,.006,.14);
@@ -6291,7 +6241,7 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
         const q=u(p);
         if(vertical)return vertical(q,sy);
         const [x,y]=bezierVuelo(curva,ritmoVuelo(q));
-        return [x,y+sy+arrastreDeEstacion(sy,inicio,fin,p)];
+        return [x,y];
       }
       function rumbo(p) {
         if(vertical)return 90;
@@ -6309,19 +6259,24 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       const r=ruta.firma;
       // Switch legs while the rig is outside the frame. A chapter jump can
       // establish its destination immediately, without replaying skipped legs.
-      const saliendo=sy<(r.finSalida+r.entradaFirma)/2;
+      if(escenaActiva<CRECIMIENTO){tramoFirma=null;avanceFirma=0;return false;}
+      if(escenaActiva===CRECIMIENTO && tramoFirma===null)return false;
+      const saliendo=escenaActiva===CRECIMIENTO || (escenaActiva===ENTRE_SECCIONES && tramoFirma!==false);
       const vueloFinal=saliendo?r.vueloDesdeCrecimiento:r.vueloAlCierre;
-      const {inicio,fin}=vueloFinal;
-      const objetivo=limitar((sy-inicio)/Math.max(1,fin-inicio));
-      const continuo=tramoFirma===saliendo && visible && sy>=inicio-.42*ruta.h && sy<=fin+.42*ruta.h;
-      const previo=avanceFirma;
-      const nuevaSalida=lugar!=='vuelo-firma' || tramoFirma!==saliendo || (saliendo?previo===1:previo===0);
-      const mando=controlFirma(previo,objetivo,orientacionFirma,dt,fin-inicio,nuevaSalida || !continuo);
+      const objetivo=Number(saliendo?escenaActiva>CRECIMIENTO:escenaActiva===CIERRE);
+      const nuevoTramo=tramoFirma!==saliendo;
+      const previo=nuevoTramo?Number(escenaActiva===CRECIMIENTO):avanceFirma;
+      const nuevaSalida=lugar!=='vuelo-firma' || nuevoTramo;
+      const mando=controlFirma(previo,objetivo,orientacionFirma,dt,nuevaSalida);
       const {sentido:meta,alineado}=mando;
       orientacionFirma=mando.rumbo;
-      const p=vueloFinal.compas(previo,mando.avance,dt,!continuo,alineado);
+      const p=vueloFinal.compas(previo,objetivo,dt,!visible,alineado);
       tramoFirma=saliendo;avanceFirma=p;
-      if(saliendo && p===0){reiniciarFirma();return false;}
+      if(saliendo && p===0){
+        // This flight already brought the body to Growth. Hand it to the
+        // greeting at that anchor instead of replaying November's entrance.
+        avanceCrecimiento=1;reiniciarFirma();return false;
+      }
       if(!saliendo && p===1){
         const entrando=lugar!=='firma';
         cambiarLugar('firma');
@@ -6377,11 +6332,18 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
     function dibujar(sy,ahora=performance.now()) {
       if(medir || !ruta) actualizarMedidas();
       const {a,b,fin,h}=ruta;
-      if(ultimaPosicion!==null && Math.abs(sy-ultimaPosicion)>1.65*h){
+      const deEscena=escenaActiva;
+      const saltoDeCapitulo=ultimaPosicion!==null && Math.abs(sy-ultimaPosicion)>1.65*h;
+      if(saltoDeCapitulo){
         // A restored scroll position or a jump across chapters skips unseen flights.
         sincronizarVuelos();
       }
       ultimaPosicion=sy;
+      escenaEnLectura(sy);
+      if(saltoDeCapitulo && deEscena>escenaActiva){
+        if(escenaActiva===CRECIMIENTO){tramoFirma=true;avanceFirma=1;}
+        if(escenaActiva===ESCRITORIO){visto=1;progresoMes=ruta.mensual.corte;}
+      }
       const unidadPuesto=b.w/355;
       const anchoEnPuesto=a.w/unidadPuesto;
       const visible=!document.hidden&&!imprimiendo;
@@ -6394,12 +6356,11 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
         cambiarLugar('quieto'); puesto.reposo();
         actor.pauseAnimations(); portatil.pauseAnimations(); return;
       }
-      const objetivo=limitar(sy/ruta.finPortada), anterior=visto;
+      const objetivo=Number(escenaActiva>PORTADA);
+      const anterior=visto??Number(escenaActiva>ESCRITORIO);
       // The first input after an idle period represents one frame of motion.
       const lapso=ahora-ultimo,dt=lapso>100?16:Math.max(1,Math.min(40,lapso));
       ultimo=ahora;
-      const delta=sy-marca;
-      if(Math.abs(delta)>4) {haciaArriba=delta<0; marca=sy;}
       if(origenDelAtajo!==null){
         // A navigation link skips chapters. Let the departure scroll away,
         // then mount the greeting in its own section before it comes into view.
@@ -6416,14 +6377,12 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
         if(sy<=1)origenDelAtajo=null;
         return;
       }
-      const enPortada=objetivo<1 || (visto!==null && visto<1);
-      const mando=controlPortada(anterior,objetivo,rumbo,dt,ruta.finPortada,
-        !enPortada || anterior===0 || anterior===1);
+      const mando=controlPortada(anterior,objetivo,rumbo,dt,anterior===0 || anterior===1);
       const invertir=mando.sentido;
       rumbo=mando.rumbo;
-      visto=ruta.compasPortada(visto,mando.avance,dt,sy>ruta.finPortada+.72*h || !visible,mando.alineado);
+      visto=ruta.compasPortada(anterior,objetivo,dt,escenaActiva>ESCRITORIO || !visible,mando.alineado);
       const p=visto;
-      if(ruta.vertical)variableDeScroll(hero,'--viaje-portada',p.toFixed(4));
+      if(ruta.vertical)variableDeScroll(hero,'--viaje-portada',limitar(sy/ruta.finPortada).toFixed(4));
       variableDeScroll(hero,'--pista-qk',String(1-suave(p,.09,.31)));
       if(p<1 && progresoMes!==0)salirDeMes();
       if(p<=0) {
@@ -6485,7 +6444,7 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
       espalda.set(pose.backRoll||0,enVuelo,pose.flightSide??1);
       teclado.detail(contacto);
       punos.set(suave(p,.023,.17)*(1-suave(p,.882,.968)));
-      const [x,y]=puntoEnCurva(fase,sy);
+      const [x,y]=puntoEnCurva(fase);
       if(cerca) {
         const mesaX=26+(x-b.x)/unidadPuesto, mesaY=-12+(y-b.y)/unidadPuesto;
         situar(mesaX,mesaY,anchoEnPuesto,angulo);
@@ -6524,9 +6483,9 @@ function medirRutaMensual({puesto,calendario,reposo,anchoActor,viewport,portada,
     window.addEventListener('pageshow',()=>{sincronizarVuelos(); invalidar();});
     if(document.fonts) document.fonts.ready.then(invalidar);
     document.addEventListener('visibilitychange',()=>{
-      relojMes=null;relojFirma=null;frameTransferencia=null;
+      relojMes=null;relojFirma=null;frameTransferencia=null;marcaActuacion=null;
       if(document.hidden)puesto.reproducir(false);
-      else sincronizarVuelos();
+      else {ultimo=0;revisarLectura=true;}
       pedir();
     });
     window.addEventListener('beforeprint',()=>{imprimiendo=true;dibujar(scrollY);});
