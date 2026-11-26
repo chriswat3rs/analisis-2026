@@ -880,8 +880,6 @@ html:not(.anim) main .texto-scroll{filter:none!important}
 }
 .qk-bateria-display svg {width:clamp(23px,4.8cqw,52px);height:auto;margin-bottom:.35cqw}
 .qk-bateria-estado {font-size:clamp(8px,1.22cqw,13px);font-variant-numeric:tabular-nums;color:#596779}
-.qk-bateria-display:not([data-estado="completa"]) .qk-pista-carga {display:none}
-.qk-pista-carga {font:700 clamp(10px,1.5cqw,14px)/1.35 var(--font-sans);color:#174fae}
 .qk-bateria-nivel {fill:#36afc1}
 .qk-bateria-display[data-estado="baja"] .qk-bateria-nivel {fill:#e65352}
 .qk-bateria-display[hidden] {display:none}
@@ -986,24 +984,26 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
 .qk-guia-mensual {display:none}
 .avance-mensual {display:none}
 @media screen {
-  .historia {--alto-avance:52px}
   .avance-mensual:not([hidden]) {
-    position:absolute;inset:100% 0 auto;display:flex;align-items:center;
-    justify-content:center;gap:clamp(8px,1.3vw,16px);min-height:var(--alto-avance);
-    color:#535f73;font:400 12px/1.35 var(--font-sans);
+    /* The center of the photographed trackpad stays proportional to the artwork. */
+    display:block;position:absolute;z-index:3;left:50%;bottom:7.2cqw;
+    transform:translate(-50%,50%);
   }
   #avanzar-mes {
-    display:inline-flex;align-items:center;justify-content:center;gap:7px;
-    min-height:44px;padding:8px 15px;flex:none;border:1px solid #c8d9fc;
-    border-radius:24px;background:#f2f6ff;color:#174fae;cursor:pointer;
-    font:700 13px/1.25 var(--font-sans);touch-action:manipulation;
+    appearance:none;display:grid;place-items:center;width:44px;height:44px;margin:0;
+    padding:0;border:0;background:transparent;color:#374f69;cursor:pointer;touch-action:manipulation;
   }
-  #avanzar-mes:focus-visible {outline:2px solid #2866dd;outline-offset:2px}
-  #avanzar-mes:active {background:#dce8ff}
-  #avanzar-mes svg {width:16px;height:16px;flex:none}
-  #pista-mensual {max-width:20ch;text-wrap:balance}
+  #avanzar-mes:focus-visible {outline:2px solid #2866dd;outline-offset:-4px;border-radius:8px}
+  #avanzar-mes svg {width:clamp(23px,4.5cqw,30px);height:auto}
 }
-@media (hover:hover) {#avanzar-mes:hover {background:#e4edff;border-color:#94b7f4}}
+@media screen and (prefers-reduced-motion:no-preference) {
+  #avanzar-mes svg {animation:gesto-scroll-mensual 1.9s ease-in-out infinite}
+  @keyframes gesto-scroll-mensual {
+    0%,65%,100% {transform:translateY(-2px)}
+    34% {transform:translateY(2.5px)}
+  }
+}
+@media (hover:hover) {#avanzar-mes:hover {color:#174fae}}
 #noviembre {scroll-margin-top:34svh}
 @media screen {
   .qk-capitulo-mensual .historia {
@@ -1051,7 +1051,7 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
     --aire-guia:clamp(8px,2cqi,18px);
     --ancho-guia:max(40%,calc(100cqi - var(--qknow-size) - var(--aire-guia)));
     --alto-guia:max(var(--qknow-size),var(--qk-alto-apunte));
-    --tope-equipo:clamp(54px,calc((100svh - var(--alto-equipo) - var(--alto-guia) - var(--aire-guia) - var(--alto-avance)) * .5),22svh);
+    --tope-equipo:clamp(60px,calc((100svh - var(--alto-equipo) - var(--alto-guia) - var(--aire-guia)) * .5),22svh);
     --qk-tope-guia:calc(var(--tope-equipo) + var(--alto-equipo) + var(--aire-guia));
     --qk-tope-carga:var(--qk-tope-guia);
     --qk-inicio-carga:calc(var(--alto-equipo) + var(--aire-guia));
@@ -1073,6 +1073,7 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
     inset:calc(100% - 20.234375cqw) -5.3125% auto;height:20.234375cqw;
     background-size:108.474576% auto;background-position:center bottom;
   }
+  #mes-a-mes .avance-mensual {bottom:8.7cqw}
   #mes-a-mes .laptop-display {
     inset:4.8% 1.72% 5.75%;height:auto;
     padding:clamp(8px,2.8cqw,19px) clamp(8px,2.9cqw,20px) clamp(6px,2cqw,13px);
@@ -1094,7 +1095,7 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
   .qk-capitulo-mensual #mes-a-mes .qk-guia-mensual {
     grid-area:1/1;align-items:center;grid-template-columns:minmax(0,1fr) var(--qknow-size);
     min-height:var(--alto-guia);column-gap:var(--aire-guia);
-    margin-top:calc(var(--qk-inicio-carga) + var(--alto-avance));top:calc(var(--qk-tope-guia) + var(--alto-avance));
+    margin-top:var(--qk-inicio-carga);top:var(--qk-tope-guia);
   }
   .qk-capitulo-mensual #mes-a-mes .qk-guia-escena {align-self:center;margin:0}
   .qk-capitulo-mensual #mes-a-mes .qk-guia-texto {min-height:0;padding:0;gap:6px}
@@ -1138,16 +1139,14 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
       --qk-apilado:0;--ancho-guia:100%;--tope-equipo:clamp(44px,13svh,76px);
       --alto-disponible:clamp(125px,min(78svh,calc((100svh - var(--tope-equipo) - var(--qknow-size) - var(--aire-guia) - 12px) / .7)),390px);
       --ancho-equipo:min(calc((100cqi - clamp(12px,2cqi,22px)) * 2.15 / 3.15),calc(var(--alto-disponible) * 1.94));
-      --alto-tapa:min(calc(var(--alto-disponible) - clamp(22px,6cqi,42px)),calc(100svh - 20px - var(--alto-avance) - var(--ancho-equipo) * .20234375));
+      --alto-tapa:min(calc(var(--alto-disponible) - clamp(22px,6cqi,42px)),calc(100svh - 34px - var(--ancho-equipo) * .20234375));
       --qk-inicio-carga:calc(.58 * var(--alto-equipo) + var(--aire-guia));
       --qk-tope-guia:max(6px,calc((100svh - var(--qk-alto-apunte) - var(--qknow-size)) / 2));
       --qk-tope-carga:calc(var(--tope-equipo) + var(--qk-inicio-carga));
       display:grid;grid-template-columns:minmax(0,2.15fr) minmax(0,1fr);gap:clamp(12px,2cqi,22px);
     }
     #mes-a-mes .hist-grafica {grid-area:1/1;transform:none}
-    #mes-a-mes .historia.qk-leyendo .hist-grafica {top:clamp(8px,calc(100svh - var(--alto-equipo) - var(--alto-avance) - 5px),var(--tope-equipo))}
-    /* The silver base includes a transparent lower edge. Use that space for the control. */
-    #mes-a-mes .avance-mensual {top:calc(100% - 12px)}
+    #mes-a-mes .historia.qk-leyendo .hist-grafica {top:clamp(8px,calc(100svh - var(--alto-equipo) - 5px),var(--tope-equipo))}
     @media (max-height:500px) {
       #mes-a-mes .laptop-display {padding-block:6px;gap:4px}
       #mes-a-mes .display-total strong {font-size:clamp(26px,5.6cqw,36px)}
@@ -1770,6 +1769,11 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
           <figcaption class="sr" id="laptop-caption">Visitas por mes · 2026. La pantalla se actualiza al recorrer cada mes.</figcaption>
           <div class="laptop">
             <div class="laptop-base" aria-hidden="true"></div>
+            <div class="avance-mensual" hidden>
+              <button type="button" id="avanzar-mes" aria-label="Siguiente mes" aria-controls="display-month">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m7 6 5 5 5-5"/><path d="m7 13 5 5 5-5"/></svg>
+              </button>
+            </div>
             <div class="laptop-tapa">
               <div class="laptop-tapa-arte" aria-hidden="true"></div>
               <div class="laptop-display">
@@ -1781,7 +1785,6 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
                     <rect class="qk-bateria-nivel" x="4.5" y="5" width="33" height="14" rx="2.5"/>
                   </svg>
                   <strong>Batería de QKnow</strong><span class="qk-bateria-estado"></span>
-                  <span class="qk-pista-carga">Desliza para ver febrero</span>
                 </div>
                 <div class="display-summary">
                   <div><p class="display-month" id="display-month">Febrero</p><p class="display-total"><strong id="display-visits">385</strong><span>visitas</span></p></div>
@@ -1809,13 +1812,6 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
                 <tr><th scope="row">Noviembre (al día 23)</th><td>742</td><td>23</td></tr>
               </tbody>
             </table>
-          </div>
-          <div class="avance-mensual" hidden>
-            <button type="button" id="avanzar-mes" aria-describedby="pista-mensual" aria-controls="display-month">
-              <span class="mes-accion">Siguiente mes</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v15m-6-6 6 6 6-6"/></svg>
-            </button>
-            <span id="pista-mensual">Desliza para cambiar de mes</span>
           </div>
         </figure>
         <div class="qk-guia-mensual" aria-hidden="true">
@@ -2574,14 +2570,13 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
     "1,000 visitas": "1,000 visits",
     "Carga baja": "Low battery",
     "Carga completa": "Fully charged",
-    "Desliza para ver febrero": "Scroll to see February",
     "Cargando · {porcentaje} %": "Charging · {porcentaje}%",
     "Cerrar menú de capítulos": "Close chapter menu",
     "La laptop de QKnow espera sobre el escritorio": "QKnow’s laptop is on the desk",
     "Gracias": "Thank you",
     "Siguiente mes": "Next month",
     "Siguiente mes, {mes}": "Next month, {mes}",
-    "Desliza para cambiar de mes": "Scroll to change months",
+    "Ver febrero": "View February",
     "Esto lo logramos entre todos.": "We did this together.",
     "¡Vamos por más en 2027!": "Let’s build on it in 2027!",
     "Usar inglés": "Use English"
@@ -2771,10 +2766,13 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
   let mesSolicitado=-1, datosPublicados=false, ultimaApertura='';
   const botonMes=document.getElementById('avanzar-mes');
   let destinoPulsado=-1, llegadaDelAvance=null, destinoRotulado=null, idiomaDelControl='';
+  let febreroDisponible=false;
 
   function actualizarAvanceMensual(i) {
     if(!botonMes)return;
-    const siguiente=datosPublicados && i>=0 && i<MESES.length-1?i+1:-1;
+    const siguiente=datosPublicados
+      ? (i>=0 && i<MESES.length-1?i+1:-1)
+      : (febreroDisponible && mesSolicitado<=0?0:-1);
     if(i<0 || i>=destinoPulsado)destinoPulsado=-1;
     if(siguiente===destinoRotulado && idioma===idiomaDelControl)return;
     destinoRotulado=siguiente;idiomaDelControl=idioma;
@@ -2783,7 +2781,8 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
       displayMes.focus({preventScroll:true});
     }
     botonMes.parentElement.hidden=siguiente<0;
-    if(siguiente>=0){
+    if(siguiente===0)botonMes.setAttribute('aria-label',t('Ver febrero'));
+    else if(siguiente>0){
       const mes=MESES[siguiente].n;
       botonMes.setAttribute('aria-label',t('Siguiente mes, {mes}').replace('{mes}',idioma==='es'?mes.toLowerCase():t(mes)));
     }
@@ -2792,11 +2791,17 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
   if(botonMes) {
     botonMes.addEventListener('click',()=>{
       if(destinoRotulado===null || destinoRotulado<0)return;
-      const proximo=Math.max(destinoRotulado,destinoPulsado+1);
-      if(proximo>=MESES.length)return;
-      destinoPulsado=proximo;
-      const medidas=geometriaLectura || (geometriaLectura=medirLectura(scrollY));
-      llegadaDelAvance=Math.ceil(scrollParaMes(medidas,innerHeight,proximo,.12));
+      if(destinoRotulado===0){
+        // Land the presenter first. February's reading position is established
+        // at that landing and can move relative to its original text anchor.
+        llegadaDelAvance=viajeQKnow.posicionDeEntrega();
+      }else{
+        const proximo=Math.max(destinoRotulado,destinoPulsado+1);
+        if(proximo>=MESES.length)return;
+        destinoPulsado=proximo;
+        const medidas=geometriaLectura || (geometriaLectura=medirLectura(scrollY));
+        llegadaDelAvance=Math.ceil(scrollParaMes(medidas,innerHeight,proximo,.12));
+      }
       window.scrollTo({top:llegadaDelAvance,behavior:animar?'smooth':'instant'});
     });
     // An explicit scroll gesture supersedes a pending button destination.
@@ -2824,6 +2829,11 @@ svg.qknow.qk-en-viaje { width:100px; height:100px; max-width:none; overflow:visi
 
   function indicarCargaMensual(estado,nivel=0) {
     const mostrar=estado && !datosPublicados && animar;
+    const completa=Boolean(mostrar && estado==='completa');
+    if(febreroDisponible!==completa) {
+      febreroDisponible=completa;
+      if(!datosPublicados)actualizarAvanceMensual(actual);
+    }
     if(!mostrar) {
       indicadorCarga.hidden=true;
       muestraCarga='';
@@ -4379,7 +4389,9 @@ function medirRutaMensual({puesto,calendario,reposo,numeros,anchoActor,viewport,
   const llegada=[descanso[0]+dx,descanso[1]-.012*anchoActor];
   const centroEnPantalla=limitar(.68*h,Math.min(h/2,radio+14),Math.max(h/2,h-radio-14));
   const inicio=Math.max(finAnterior+Math.min(.22*h,210),origen[1]-.31*h);
-  const visibleDesde=llegada[1]+radio+12-h;
+  // A direct chapter link can already show the charging station while its
+  // transparent SVG margin still extends below the viewport on short laptops.
+  const visibleDesde=reposo.y+Math.min(reposo.h*.45,120)-h;
   const fin=Math.max(inicio+1,Math.min(llegada[1]-centroEnPantalla,cargaCentrada?portada:Math.max(portada,visibleDesde)));
   const avance=sy=>unidad((sy-inicio)/(fin-inicio));
 
@@ -6136,7 +6148,10 @@ function medirRutaMensual({puesto,calendario,reposo,numeros,anchoActor,viewport,
     });
     window.addEventListener('beforeprint',()=>{imprimiendo=true;dibujar(scrollY);});
     window.addEventListener('afterprint',()=>{imprimiendo=false;visto=null;invalidar();});
-    return {actualizar,invalidar,activar(valor) {
+    return {actualizar,invalidar,posicionDeEntrega() {
+      if(medir || !ruta)actualizarMedidas();
+      return Math.ceil(ruta.guia.fin)+1;
+    },activar(valor) {
       if(activo===valor && ruta) return;
       activo=valor; visto=null; progresoMes=null;avanceCrecimiento=null;
       if(!activo){detenerOrgullo();reiniciarFirma();}
