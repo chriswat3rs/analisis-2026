@@ -715,15 +715,19 @@ body{overflow-x:clip}
 .cierre .cierre-firma{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;margin-top:0;flex-wrap:nowrap;min-width:0;text-align:center}
 .gracias-anio{display:block;margin-top:.5em;font-size:clamp(15px,1.25vw,20px);line-height:1.35;font-weight:400;letter-spacing:normal}
 .cierre .gracias{font-size:clamp(46px,4.3vw,64px);line-height:1.05;font-weight:800;letter-spacing:-.04em}
-.cierre .sobre{margin-top:64px;padding-top:22px;max-width:none;display:grid;grid-template-columns:140px minmax(0,1fr) auto;gap:24px;border-color:#DADFE7}
-.sobre-quality{display:block;place-self:end;width:clamp(110px,10vw,150px);max-width:100%;height:auto}
-.cierre .sobre-tit{font-size:11px;font-weight:700;line-height:1.7}.cierre .sobre p{max-width:120ch;font-size:8px;line-height:1.85;font-weight:400;color:#777}
+.cierre .sobre{margin-top:64px;padding-top:22px;max-width:none;display:grid;grid-template-columns:max-content minmax(0,1fr) auto;align-items:center;gap:24px;border-color:#DADFE7}
+.sobre-quality{display:block;justify-self:end;width:clamp(110px,10vw,150px);max-width:100%;height:auto}
+.cierre .sobre-tit{font-size:11px;font-weight:700;line-height:1.7}
+.cierre .sobre p{justify-self:center;max-width:88ch;text-align:center;font-size:12px;line-height:1.65;font-weight:400;color:#777}
 .cierre .manifiesto.revela{clip-path:none;transition:opacity 900ms ease,transform 1100ms var(--ease-salida)}
 .anim #cierre .manifiesto.revela:not(.visible){clip-path:none;transform:translateY(30px)}
 @media(max-width:900px){
  .cierre-principal{grid-template-columns:minmax(0,1fr);gap:30px}.cierre-texto{text-align:center;max-width:650px;margin-inline:auto}
  .cierre .cierre-titulo,.cierre .cierre-copy,.cierre .cierre-futuro{margin-inline:auto}.cierre .cierre-firma{margin-top:0}
- .cierre .sobre{grid-template-columns:minmax(0,1fr);gap:12px;margin-top:40px}
+ .cierre .sobre{margin-top:40px}
+}
+@media(max-width:640px){
+ .cierre .sobre{grid-template-columns:minmax(0,1fr);gap:16px}
 }
 @media(max-width:600px){
  .marca-quality{top:14px;left:20px;gap:8px}.marca-quality img{width:36px;height:36px}.marca-quality span{font-size:10px}
